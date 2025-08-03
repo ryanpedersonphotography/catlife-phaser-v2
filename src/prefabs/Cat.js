@@ -4,11 +4,11 @@ import { CAT_STATES, NEED_TYPES, DEPTHS } from '../data/Constants';
 export default class Cat extends GameObjects.Container {
     constructor(scene, catData) {
         super(scene, 0, 0);
-        
+
         this.scene = scene;
         this.data = catData;
         this.id = catData.id;
-        
+
         // Stats
         this.stats = {
             happiness: 50,
@@ -19,56 +19,88 @@ export default class Cat extends GameObjects.Container {
             cleanliness: 100,
             health: 100
         };
-        
+
         // State
         this.currentState = CAT_STATES.IDLE;
         this.currentRoom = null;
         this.target = null;
         this.isDragging = false;
-        
+
         // Behavior
         this.behaviorTimer = 0;
         this.behaviorCooldown = 0;
         this.lastMedicationTime = null;
-        
+
         // Special needs
         this.medicationNeeded = false;
         this.morningRoutineComplete = false;
-        
+
         // Create sprite
         this.createSprite();
-        
+
         // Add to scene
         scene.add.existing(this);
         this.setDepth(DEPTHS.CATS);
-        
-        // Make interactive - use the sprite itself for interaction
-        this.setSize(64, 64);
-        this.setInteractive({ 
+
+        // Make the sprite itself interactive instead of the container
+        // This avoids the black rectangle issue
+        this.sprite.setInteractive({ 
             draggable: true,
             useHandCursor: true
         });
         
-        // Remove the container's debug graphics
-        if (this.input && this.input.hitArea) {
-            this.input.hitArea.setTo(0, 0, 64, 64);
-        }
+        // Set up drag events on the sprite
+        this.sprite.on('dragstart', () => this.startDrag());
+        this.sprite.on('drag', (pointer, dragX, dragY) => {
+            this.x = dragX;
+            this.y = dragY;
+        });
+        this.sprite.on('dragend', () => this.endDrag());
         
+        // Also make the sprite clickable
+        this.sprite.on('pointerdown', () => {
+            this.scene.handleCatClick(this);
+        });
+
         // AI will start in update loop
     }
-    
+
     createSprite() {
-        // Get the sprite sheet key based on color
-        const spriteColor = this.scene.scene.get('PreloadScene').getClosestSpriteColor(this.data.color);
+        // Define color mapping directly here to avoid dependency issues
+        const colorMap = {
+            '#FF6B6B': 'pink',
+            '#FF9F1C': 'orange',
+            '#9B59B6': 'pink',
+            '#F39C12': 'orange',
+            '#7F8C8D': 'gray',
+            '#E74C3C': 'orange',
+            '#2C3E50': 'gray',
+            '#000000': 'black',
+            '#ECF0F1': 'gray',
+            '#34495E': 'gray',
+            '#8B4513': 'brown',
+            '#5D6D7E': 'gray',
+            '#D35400': 'orange',
+            '#F8BBD0': 'pink',
+            '#FFAB00': 'orange',
+            '#FDD835': 'yellow',
+            '#43A047': 'green',
+            '#E91E63': 'pink',
+            '#FF5722': 'orange',
+            '#FDD835': 'yellow'
+        };
+
+        // Get the sprite color
+        const spriteColor = colorMap[this.data.color] || 'gray';
         const spriteSheetKey = `cat_${spriteColor}`;
-        
-        console.log(`Cat ${this.data.name}: Creating sprite with texture ${spriteSheetKey}`);
-        
-        // Main sprite using sprite sheet
-        this.sprite = this.scene.add.sprite(0, 0, spriteSheetKey);
-        this.sprite.setScale(2); // Scale up 32x32 sprites to appear larger
+
+        console.log(`Cat ${this.data.name}: Creating sprite with texture ${spriteSheetKey} (color: ${this.data.color})`);
+
+        // Main sprite using sprite sheet - specify frame 0 initially
+        this.sprite = this.scene.add.sprite(0, 0, spriteSheetKey, 0);
+        this.sprite.setScale(1.5); // Scale up for better visibility
         this.add(this.sprite);
-        
+
         // Name label
         this.nameLabel = this.scene.add.text(0, -40, this.data.name, {
             fontSize: '14px',
@@ -78,21 +110,21 @@ export default class Cat extends GameObjects.Container {
             strokeThickness: 2
         }).setOrigin(0.5);
         this.add(this.nameLabel);
-        
+
         // Status indicators
         this.createStatusIndicators();
-        
+
         // Set initial frame and start idle animation
         this.sprite.setFrame(0);
         this.playAnimation('idle');
-        
+
         // Ensure sprite is visible
         this.sprite.setVisible(true);
         this.sprite.setAlpha(1);
-        
+
         // Store sprite sheet key for animations
         this.spriteSheetKey = spriteSheetKey;
-        
+
         // Debug visibility
         console.log(`Cat ${this.data.name} sprite:`, {
             texture: spriteSheetKey,
@@ -105,7 +137,7 @@ export default class Cat extends GameObjects.Container {
             height: this.sprite.height
         });
     }
-    
+
     playAnimation(animKey) {
         const fullAnimKey = `${this.spriteSheetKey}_${animKey}`;
         if (this.sprite && this.scene.anims.exists(fullAnimKey)) {
@@ -113,72 +145,72 @@ export default class Cat extends GameObjects.Container {
             this.currentAnimation = animKey;
         }
     }
-    
+
     createStatusIndicators() {
         // Mood indicator
         this.moodIndicator = this.scene.add.text(-30, 20, '', {
             fontSize: '20px'
         }).setOrigin(0.5);
         this.add(this.moodIndicator);
-        
+
         // Need indicator
         this.needIndicator = this.scene.add.text(30, 20, '', {
             fontSize: '20px'
         }).setOrigin(0.5);
         this.add(this.needIndicator);
-        
+
         // Update indicators
         this.updateStatusIndicators();
     }
-    
+
     updateStatusIndicators() {
         // Mood based on happiness
         let mood = '';
-        if (this.stats.happiness > 70) mood = '😊';
-        else if (this.stats.happiness > 40) mood = '😐';
-        else mood = '😿';
+        if (this.stats.happiness > 70) mood = ':)';
+        else if (this.stats.happiness > 40) mood = ':|';
+        else mood = ':(';
         this.moodIndicator.setText(mood);
-        
+
         // Primary need
         let need = '';
-        if (this.stats.hunger > 70) need = '🍽️';
-        else if (this.stats.thirst > 70) need = '💧';
-        else if (this.stats.bathroom > 70) need = '🚽';
-        else if (this.stats.energy < 30) need = '😴';
-        else if (this.medicationNeeded) need = '💊';
+        if (this.stats.hunger > 70) need = 'Food';
+        else if (this.stats.thirst > 70) need = 'Water';
+        else if (this.stats.bathroom > 70) need = 'WC';
+        else if (this.stats.energy < 30) need = 'Zzz';
+        else if (this.medicationNeeded) need = 'Med';
         this.needIndicator.setText(need);
     }
-    
+
     update(time, delta) {
         // Update stats over time
         this.updateStats(delta);
-        
+
         // Update behavior
         this.updateBehavior(delta);
-        
+
         // Update animations
         this.updateAnimation();
-        
+
         // Update status indicators
         this.updateStatusIndicators();
-        
+
         // Check special conditions
         this.checkSpecialConditions();
     }
-    
+
     updateStats(delta) {
         const deltaSeconds = delta / 1000;
         const difficultyMultiplier = this.scene.registry.get('difficultyMultiplier') || 1;
-        
+
         // Increase needs over time
         this.stats.hunger += (2 * difficultyMultiplier * deltaSeconds);
         this.stats.thirst += (3 * difficultyMultiplier * deltaSeconds);
         this.stats.bathroom += (1.5 * difficultyMultiplier * deltaSeconds);
-        
+
         // Decrease energy over time (more if active)
         const energyLoss = this.currentState === CAT_STATES.PLAYING ? 3 : 1;
         this.stats.energy -= (energyLoss * deltaSeconds);
-        
+
         // Affect happiness based on needs
         if (this.stats.hunger > 80 || this.stats.thirst > 80) {
             this.stats.happiness -= (1 * deltaSeconds);
@@ -186,26 +218,26 @@ export default class Cat extends GameObjects.Container {
         if (this.stats.bathroom > 90) {
             this.stats.happiness -= (2 * deltaSeconds);
         }
-        
+
         // Clamp values
         Object.keys(this.stats).forEach(stat => {
             this.stats[stat] = Phaser.Math.Clamp(this.stats[stat], 0, 100);
         });
     }
-    
+
     updateBehavior(delta) {
         this.behaviorTimer += delta;
-        
+
         if (this.behaviorTimer > this.behaviorCooldown && !this.isDragging) {
             this.decideBehavior();
             this.behaviorTimer = 0;
             this.behaviorCooldown = Phaser.Math.Between(3000, 8000);
         }
-        
+
         // Execute current behavior
         this.executeBehavior(delta);
     }
-    
+
     decideBehavior() {
         // Priority system for behaviors
         if (this.stats.hunger > 70) {
@@ -222,23 +254,23 @@ export default class Cat extends GameObjects.Container {
             this.seekPlay();
         }
     }
-    
+
     executeBehavior(delta) {
         if (this.target && !this.isDragging) {
             // Move towards target
             const distance = Phaser.Math.Distance.Between(this.x, this.y, this.target.x, this.target.y);
-            
+
             if (distance > 50) {
                 // Move towards target
                 const angle = Phaser.Math.Angle.Between(this.x, this.y, this.target.x, this.target.y);
                 const speed = 50 * (delta / 1000);
-                
+
                 this.x += Math.cos(angle) * speed;
                 this.y += Math.sin(angle) * speed;
-                
+
                 // Face direction
                 this.sprite.setFlipX(Math.cos(angle) < 0);
-                
+
                 this.setState(CAT_STATES.WALKING);
             } else {
                 // Reached target
@@ -246,7 +278,7 @@ export default class Cat extends GameObjects.Container {
             }
         }
     }
-    
+
     seekFood() {
         const bowl = this.scene.getNearestObject(this.x, this.y, 'food');
         if (bowl && !bowl.isEmpty()) {
@@ -254,7 +286,7 @@ export default class Cat extends GameObjects.Container {
             this.targetType = 'food';
         }
     }
-    
+
     seekWater() {
         const bowl = this.scene.getNearestObject(this.x, this.y, 'water');
         if (bowl && !bowl.isEmpty()) {
@@ -262,7 +294,7 @@ export default class Cat extends GameObjects.Container {
             this.targetType = 'water';
         }
     }
-    
+
     seekLitterBox() {
         const litterBox = this.scene.getNearestObject(this.x, this.y, 'litter');
         if (litterBox && !litterBox.isFull()) {
@@ -270,7 +302,7 @@ export default class Cat extends GameObjects.Container {
             this.targetType = 'litter';
         }
     }
-    
+
     seekSleep() {
         // Go to favorite sleep spot
         const room = this.scene.rooms[this.data.preferences.favoriteRoom];
@@ -282,7 +314,7 @@ export default class Cat extends GameObjects.Container {
             this.targetType = 'sleep';
         }
     }
-    
+
     seekPlay() {
         const toy = this.scene.getNearestObject(this.x, this.y, 'toy');
         if (toy) {
@@ -290,7 +322,7 @@ export default class Cat extends GameObjects.Container {
             this.targetType = 'play';
         }
     }
-    
+
     wander() {
         // Pick random location in current room
         if (this.currentRoom) {
@@ -301,7 +333,7 @@ export default class Cat extends GameObjects.Container {
             this.targetType = 'wander';
         }
     }
-    
+
     handleTargetReached() {
         switch(this.targetType) {
             case 'food':
@@ -320,53 +352,53 @@ export default class Cat extends GameObjects.Container {
                 this.play();
                 break;
         }
-        
+
         this.target = null;
         this.targetType = null;
     }
-    
+
     eat() {
         if (this.target && !this.target.isEmpty()) {
             this.setState(CAT_STATES.EATING);
             this.stats.hunger = Math.max(0, this.stats.hunger - 30);
             this.stats.happiness += 10;
             this.target.consume();
-            
+
             // Eating animation
             this.scene.time.delayedCall(2000, () => {
                 this.setState(CAT_STATES.IDLE);
             });
         }
     }
-    
+
     drink() {
         if (this.target && !this.target.isEmpty()) {
             this.setState(CAT_STATES.EATING);
             this.stats.thirst = Math.max(0, this.stats.thirst - 30);
             this.target.consume();
-            
+
             this.scene.time.delayedCall(1500, () => {
                 this.setState(CAT_STATES.IDLE);
             });
         }
     }
-    
+
     useLitterBox() {
         if (this.target && !this.target.isFull()) {
             this.setState(CAT_STATES.USING_LITTER);
             this.stats.bathroom = 0;
             this.stats.happiness += 5;
             this.target.use();
-            
+
             this.scene.time.delayedCall(3000, () => {
                 this.setState(CAT_STATES.IDLE);
             });
         }
     }
-    
+
     sleep() {
         this.setState(CAT_STATES.SLEEPING);
-        
+
         // Regenerate energy while sleeping
         this.scene.time.addEvent({
             delay: 1000,
@@ -379,12 +411,12 @@ export default class Cat extends GameObjects.Container {
             repeat: 10
         });
     }
-    
+
     play() {
         this.setState(CAT_STATES.PLAYING);
         this.stats.happiness += 15;
         this.stats.energy -= 10;
-        
+
         // Play animation
         this.scene.tweens.add({
             targets: this.sprite,
@@ -396,14 +428,14 @@ export default class Cat extends GameObjects.Container {
             }
         });
     }
-    
+
     setState(state) {
         if (this.currentState === state) return;
-        
+
         this.currentState = state;
         this.updateAnimation();
     }
-    
+
     updateAnimation() {
         // Use proper animations with the new sprite sheets
         const animName = this.getAnimationName();
@@ -411,7 +443,7 @@ export default class Cat extends GameObjects.Container {
             this.playAnimation(animName);
         }
     }
-    
+
     getAnimationName() {
         switch(this.currentState) {
             case CAT_STATES.IDLE:
@@ -428,7 +460,7 @@ export default class Cat extends GameObjects.Container {
                 return 'idle';
         }
     }
-    
+
     getStaticFrame() {
         switch(this.currentState) {
             case CAT_STATES.IDLE:
@@ -445,20 +477,20 @@ export default class Cat extends GameObjects.Container {
                 return 0;
         }
     }
-    
+
     checkSpecialConditions() {
         // Check medication times
         if (this.data.specialNeeds && this.data.specialNeeds.medication) {
             const currentHour = this.scene.timeManager.getCurrentTime().hour;
             const medTime = this.data.specialNeeds.medicationTime;
-            
+
             if (Array.isArray(medTime)) {
                 this.medicationNeeded = medTime.includes(currentHour);
             } else {
                 this.medicationNeeded = currentHour === medTime;
             }
         }
-        
+
         // Check Tink's morning routine
         if (this.id === 'tink') {
             const time = this.scene.timeManager.getCurrentTime();
@@ -472,30 +504,30 @@ export default class Cat extends GameObjects.Container {
             }
         }
     }
-    
+
     setRoom(room) {
         this.currentRoom = room;
-        
+
         // Set position to center of room
         this.x = room.x + room.width / 2;
         this.y = room.y + room.height / 2;
     }
-    
+
     startDrag() {
         this.isDragging = true;
         this.setAlpha(0.8);
         this.setState(CAT_STATES.IDLE);
     }
-    
+
     drag(x, y) {
         this.x = x;
         this.y = y;
     }
-    
+
     endDrag() {
         this.isDragging = false;
         this.setAlpha(1);
-        
+
         // Check which room we're in
         const room = this.scene.getRoomAt(this.x, this.y);
         if (room) {
@@ -511,7 +543,7 @@ export default class Cat extends GameObjects.Container {
             }
         }
     }
-    
+
     canBeInRoom(room) {
         // Check Tink's morning routine
         if (this.id === 'tink') {
@@ -520,12 +552,12 @@ export default class Cat extends GameObjects.Container {
                 return false;
             }
         }
-        
+
         // Check if room requires open door
         if (room.id === 'outside' && !this.scene.registry.get('isDoorOpen')) {
             return false;
         }
-        
+
         // Check for conflicting cats
         const catsInRoom = this.scene.getCatsInRoom(room.id);
         for (const cat of catsInRoom) {
@@ -533,10 +565,10 @@ export default class Cat extends GameObjects.Container {
                 return false;
             }
         }
-        
+
         return true;
     }
-    
+
     dailyReset() {
         // Reset some stats for new day
         this.morningRoutineComplete = false;

@@ -84,9 +84,9 @@ export default class GameOverScene extends Scene {
         
         // Stats
         const stats = [
-            { label: 'Final Score', value: this.finalScore, icon: '⭐' },
-            { label: 'Days Survived', value: this.daysCompleted, icon: '📅' },
-            { label: 'Cats Helped', value: this.catsHelped, icon: '🐱' }
+            { label: 'Final Score', value: this.finalScore, icon: 'S' },
+            { label: 'Days Survived', value: this.daysCompleted, icon: 'D' },
+            { label: 'Cats Helped', value: this.catsHelped, icon: 'C' }
         ];
         
         stats.forEach((stat, index) => {

@@ -38,7 +38,7 @@ export default class FoodBowl extends GameObjects.Container {
         this.add(this.amountText);
         
         // Type icon
-        const icon = this.type === 'water' ? '💧' : '🍲';
+        const icon = this.type === 'water' ? 'W' : 'F';
         this.typeIcon = this.scene.add.text(25, -25, icon, {
             fontSize: '20px'
         }).setOrigin(0.5);

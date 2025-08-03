@@ -130,13 +130,13 @@ export default class DaySummaryScene extends Scene {
         
         // Individual stats
         const statItems = [
-            { label: 'Cats Fed', value: this.stats.catsFed || 0, icon: '🍽️', points: 10 },
-            { label: 'Water Given', value: this.stats.catsWatered || 0, icon: '💧', points: 5 },
-            { label: 'Litter Boxes Cleaned', value: this.stats.litterBoxesCleaned || 0, icon: '🧹', points: 15 },
-            { label: 'Play Sessions', value: this.stats.catsPlayed || 0, icon: '🎾', points: 8 },
-            { label: 'Medications Given', value: this.stats.medicationsGiven || 0, icon: '💊', points: 25 },
-            { label: 'Special Needs Met', value: this.stats.specialNeedsMet || 0, icon: '⭐', points: 30 },
-            { label: 'Accidents', value: this.stats.accidents || 0, icon: '❌', points: -50 }
+            { label: 'Cats Fed', value: this.stats.catsFed || 0, icon: 'F', points: 10 },
+            { label: 'Water Given', value: this.stats.catsWatered || 0, icon: 'W', points: 5 },
+            { label: 'Litter Boxes Cleaned', value: this.stats.litterBoxesCleaned || 0, icon: 'C', points: 15 },
+            { label: 'Play Sessions', value: this.stats.catsPlayed || 0, icon: 'P', points: 8 },
+            { label: 'Medications Given', value: this.stats.medicationsGiven || 0, icon: 'M', points: 25 },
+            { label: 'Special Needs Met', value: this.stats.specialNeedsMet || 0, icon: 'S', points: 30 },
+            { label: 'Accidents', value: this.stats.accidents || 0, icon: 'X', points: -50 }
         ];
         
         statItems.forEach((stat, index) => {

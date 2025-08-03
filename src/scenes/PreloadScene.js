@@ -83,7 +83,10 @@ export default class PreloadScene extends Scene {
     }
 
     loadRealAssets() { 
-        console.log('LoadRealAssets: Starting to load cat sprite sheets');
+        console.log('LoadRealAssets: Starting to load all assets');
+        
+        // Set the base path for all assets
+        this.load.setPath('assets/sprites/');
         
         // Map of cat colors to sprite sheet files
         const catSpriteSheets = {
@@ -103,28 +106,27 @@ export default class PreloadScene extends Scene {
         // Load cat sprite sheets
         Object.entries(catSpriteSheets).forEach(([color, filename]) => {
             const key = `cat_${color}`;
-            const path = `cat_assets/${filename}`;
-            console.log(`Loading sprite sheet: ${key} from ${path}`);
+            console.log(`Loading sprite sheet: ${key} from ${filename}`);
             
-            // Each sprite sheet has 32x32 pixel sprites in a grid
-            this.load.spritesheet(key, path, {
-                frameWidth: 32,
-                frameHeight: 32,
+            // Each sprite sheet has 64x64 pixel sprites in a grid
+            this.load.spritesheet(key, filename, {
+                frameWidth: 64,
+                frameHeight: 64,
                 margin: 0,
                 spacing: 0
             });
         });
         
         // Load game object sprites (only those that exist as files)
-        this.load.image('food_bowl_empty', 'assets/sprites/food_bowl_empty.png');
-        this.load.image('litter_box_clean', 'assets/sprites/litter_box_clean.png');
+        this.load.image('food_bowl_empty', 'food_bowl_empty.png');
+        this.load.image('litter_box_clean', 'litter_box_clean.png');
         
         // Load UI elements
-        this.load.image('ui_panel', 'assets/sprites/ui_panel.png');
-        this.load.image('particle_star', 'assets/sprites/particle_star.png');
-        this.load.image('particle_heart', 'assets/sprites/particle_heart.png');
-        this.load.image('particle_sparkle', 'assets/sprites/particle_sparkle.png');
-        this.load.image('icon_heart', 'assets/sprites/icon_heart.png');
+        this.load.image('ui_panel', 'ui_panel.png');
+        this.load.image('particle_star', 'particle_star.png');
+        this.load.image('particle_heart', 'particle_heart.png');
+        this.load.image('particle_sparkle', 'particle_sparkle.png');
+        this.load.image('icon_heart', 'icon_heart.png');
     }
 
     // Map cat colors to available sprite colors
@@ -426,13 +428,15 @@ export default class PreloadScene extends Scene {
             const spriteKey = `cat_${color}`;
             
             if (this.textures.exists(spriteKey)) {
-                // Based on the sprite sheet layout:
-                // Row 1 (frames 0-31): Sitting down
-                // Row 2 (frames 32-63): Looking around  
-                // Row 3 (frames 64-95): Laying down
-                // Row 4 (frames 96-127): Walking
-                // Row 5 (frames 128-159): Running
-                // Row 6 (frames 160-191): Running 2.0
+                // Based on the sprite sheet layout (16 frames per row at 64x64):
+                // Row 1 (frames 0-15): Sitting down
+                // Row 2 (frames 16-31): Looking around  
+                // Row 3 (frames 32-47): Laying down
+                // Row 4 (frames 48-63): Walking
+                // Row 5 (frames 64-79): Running
+                // Row 6 (frames 80-95): Running 2.0
+                // Row 7 (frames 96-111): Side walk
+                // Row 8 (frames 112-127): Sitting 2.0
                 
                 // Idle/Sitting animation - use first few frames of sitting
                 this.anims.create({
@@ -449,8 +453,8 @@ export default class PreloadScene extends Scene {
                 this.anims.create({
                     key: `${spriteKey}_walk`,
                     frames: this.anims.generateFrameNumbers(spriteKey, {
-                        start: 96,
-                        end: 103
+                        start: 48,
+                        end: 55
                     }),
                     frameRate: 8,
                     repeat: -1
@@ -460,8 +464,8 @@ export default class PreloadScene extends Scene {
                 this.anims.create({
                     key: `${spriteKey}_sleep`,
                     frames: this.anims.generateFrameNumbers(spriteKey, {
-                        start: 64,
-                        end: 67
+                        start: 32,
+                        end: 35
                     }),
                     frameRate: 2,
                     repeat: -1

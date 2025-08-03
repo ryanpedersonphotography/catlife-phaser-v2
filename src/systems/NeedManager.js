@@ -191,10 +191,10 @@ export default class NeedManager {
     
     getCriticalNeedMessage(catName, need) {
         const messages = {
-            hunger: `${catName} is very hungry! 🍽️`,
-            thirst: `${catName} needs water badly! 💧`,
-            bathroom: `${catName} really needs the litter box! 🚽`,
-            exhaustion: `${catName} is exhausted! 😴`
+            hunger: `${catName} is very hungry!`,
+            thirst: `${catName} needs water badly!`,
+            bathroom: `${catName} really needs the litter box!`,
+            exhaustion: `${catName} is exhausted!`
         };
         
         return messages[need] || `${catName} needs attention!`;
@@ -236,7 +236,7 @@ export default class NeedManager {
         
         // Show notification
         this.scene.showNotification(
-            `Oh no! ${cat.data.name} had an accident! 😿`,
+            `Oh no! ${cat.data.name} had an accident!`,
             'error'
         );
         

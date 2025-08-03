@@ -223,7 +223,32 @@ export default class MainMenuScene extends Scene {
         positions.forEach((pos, index) => {
             if (index < cats.length) {
                 // Create a static sprite (no animation for menu)
-                const cat = this.add.image(pos.x, pos.y, cats[index].sprite.texture);
+                // Use color-based texture instead of per-cat texture
+                const colorMap = {
+                    '#FF6B6B': 'pink',
+                    '#FF9F1C': 'orange',
+                    '#9B59B6': 'pink',
+                    '#F39C12': 'orange',
+                    '#7F8C8D': 'gray',
+                    '#E74C3C': 'orange',
+                    '#2C3E50': 'gray',
+                    '#000000': 'black',
+                    '#ECF0F1': 'gray',
+                    '#34495E': 'gray',
+                    '#8B4513': 'brown',
+                    '#5D6D7E': 'gray',
+                    '#D35400': 'orange',
+                    '#F8BBD0': 'pink',
+                    '#FFAB00': 'orange',
+                    '#FDD835': 'yellow',
+                    '#43A047': 'green',
+                    '#E91E63': 'pink',
+                    '#FF5722': 'orange',
+                    '#FDD835': 'yellow'
+                };
+                const spriteColor = colorMap[cats[index].color] || 'gray';
+                const spriteSheetKey = `cat_${spriteColor}`;
+                const cat = this.add.image(pos.x, pos.y, spriteSheetKey, 0);
                 cat.setScale(0.8);
                 
                 // Simple bob animation instead of walking
@@ -283,13 +308,13 @@ export default class MainMenuScene extends Scene {
         }).setOrigin(0.5);
         
         const instructions = [
-            '🐱 Care for 9 special needs cats',
-            '🍲 Keep them fed and happy',
-            '🧹 Clean litter boxes regularly',
-            '💊 Give medications on time',
-            '😴 Ensure they get enough sleep',
-            '🚪 Manage the door for outdoor cats',
-            '⭐ Earn points for good care'
+            'Care for 9 special needs cats',
+            'Keep them fed and happy',
+            'Clean litter boxes regularly',
+            'Give medications on time',
+            'Ensure they get enough sleep',
+            'Manage the door for outdoor cats',
+            'Earn points for good care'
         ];
         
         instructions.forEach((text, index) => {
@@ -322,7 +347,7 @@ export default class MainMenuScene extends Scene {
 
     showCredits() {
         // Credits will be implemented
-        this.showMessage('Created with love for all special needs cats! 🐱');
+        this.showMessage('Created with love for all special needs cats!');
     }
 
     createNewGameDialog() {

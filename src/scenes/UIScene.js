@@ -105,10 +105,10 @@ export default class UIScene extends Scene {
 
     createTopButtons() {
         const buttons = [
-            { x: 950, icon: '⏸️', action: () => this.pauseGame() },
-            { x: 1020, icon: '⚙️', action: () => this.openSettings() },
-            { x: 1090, icon: '💾', action: () => this.saveGame() },
-            { x: 1160, icon: '🚪', action: () => this.toggleDoor() }
+            { x: 950, icon: 'II', action: () => this.pauseGame() },
+            { x: 1020, icon: 'S', action: () => this.openSettings() },
+            { x: 1090, icon: 'Save', action: () => this.saveGame() },
+            { x: 1160, icon: 'Door', action: () => this.toggleDoor() }
         ];
         
         buttons.forEach(btn => {
@@ -206,7 +206,7 @@ export default class UIScene extends Scene {
         
         // Speed buttons
         const speeds = [0.5, 1, 2, 5];
-        const buttons = ['⏪', '▶️', '⏩', '⏭️'];
+        const buttons = ['<<', '>', '>>', '>>>'];
         
         buttons.forEach((btn, index) => {
             const button = this.add.text(x - 60 + index * 40, y + 25, btn, {
@@ -255,7 +255,7 @@ export default class UIScene extends Scene {
         this.catInfoPanel.add(this.catInfoStats);
         
         // Close button
-        const closeBtn = this.add.text(120, -160, '❌', {
+        const closeBtn = this.add.text(120, -160, 'X', {
             fontSize: '24px'
         }).setOrigin(0.5)
           .setInteractive({ useHandCursor: true });
@@ -269,7 +269,32 @@ export default class UIScene extends Scene {
 
     showCatInfo(catData) {
         this.catInfoPanel.setVisible(true);
-        this.catInfoSprite.setTexture(catData.sprite.texture);
+        // Use color-based texture instead of per-cat texture
+        const colorMap = {
+            '#FF6B6B': 'pink',
+            '#FF9F1C': 'orange',
+            '#9B59B6': 'pink',
+            '#F39C12': 'orange',
+            '#7F8C8D': 'gray',
+            '#E74C3C': 'orange',
+            '#2C3E50': 'gray',
+            '#000000': 'black',
+            '#ECF0F1': 'gray',
+            '#34495E': 'gray',
+            '#8B4513': 'brown',
+            '#5D6D7E': 'gray',
+            '#D35400': 'orange',
+            '#F8BBD0': 'pink',
+            '#FFAB00': 'orange',
+            '#FDD835': 'yellow',
+            '#43A047': 'green',
+            '#E91E63': 'pink',
+            '#FF5722': 'orange',
+            '#FDD835': 'yellow'
+        };
+        const spriteColor = colorMap[catData.color] || 'gray';
+        const spriteSheetKey = `cat_${spriteColor}`;
+        this.catInfoSprite.setTexture(spriteSheetKey, 0);
         this.catInfoName.setText(catData.name);
         
         const conditionText = catData.specialNeeds && catData.specialNeeds.condition 

@@ -17,10 +17,6 @@ module.exports = {
             {
                 directory: path.join(__dirname, 'assets'),
                 publicPath: '/assets'
-            },
-            {
-                directory: path.join(__dirname, 'cat_assets'),
-                publicPath: '/cat_assets'
             }
         ],
         compress: true,
@@ -34,8 +30,7 @@ module.exports = {
         }),
         new CopyWebpackPlugin({
             patterns: [
-                { from: 'assets', to: 'assets' },
-                { from: 'cat_assets', to: 'cat_assets' }
+                { from: 'assets', to: 'assets' }
             ]
         })
     ],

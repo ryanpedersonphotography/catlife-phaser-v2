@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Sprite Loading</title>
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3.70.0/dist/phaser.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+            background-color: #222;
+            color: white;
+        }
+        #game-container {
+            margin: 20px auto;
+            width: 800px;
+            height: 600px;
+            border: 2px solid #444;
+        }
+        #debug-info {
+            margin: 20px auto;
+            width: 800px;
+            background: #333;
+            padding: 20px;
+            border-radius: 8px;
+        }
+        pre {
+            background: #000;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <div id="debug-info">
+        <h2>Sprite Loading Debug</h2>
+        <div id="log"></div>
+    </div>
+    <div id="game-container"></div>
+
+    <script>
+        const log = (msg) => {
+            const logDiv = document.getElementById('log');
+            const pre = document.createElement('pre');
+            pre.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
+            logDiv.appendChild(pre);
+            console.log(msg);
+        };
+
+        class DebugScene extends Phaser.Scene {
+            constructor() {
+                super({ key: 'DebugScene' });
+            }
+
+            preload() {
+                log('Starting preload...');
+                
+                // Test loading a single sprite sheet
+                const testColor = 'orange';
+                const path = `cat_assets/${testColor}_0.png`;
+                
+                log(`Loading sprite sheet: cat_${testColor} from ${path}`);
+                
+                this.load.spritesheet(`cat_${testColor}`, path, {
+                    frameWidth: 32,
+                    frameHeight: 32,
+                    margin: 0,
+                    spacing: 0
+                });
+
+                this.load.on('filecomplete', (key, type, data) => {
+                    log(`File loaded: ${key} (${type})`);
+                });
+
+                this.load.on('loaderror', (file) => {
+                    log(`ERROR loading: ${file.key} from ${file.src}`);
+                });
+            }
+
+            create() {
+                log('Create phase started');
+                
+                // Check if texture exists
+                const textureKey = 'cat_orange';
+                const exists = this.textures.exists(textureKey);
+                log(`Texture '${textureKey}' exists: ${exists}`);
+                
+                if (exists) {
+                    // Get texture info
+                    const texture = this.textures.get(textureKey);
+                    log(`Texture frame count: ${texture.frameTotal}`);
+                    
+                    // Try to create a sprite with frame 0
+                    try {
+                        const sprite = this.add.sprite(400, 300, textureKey, 0);
+                        sprite.setScale(4); // Make it bigger to see
+                        log('Sprite created successfully!');
+                        
+                        // Try different frames
+                        let frame = 0;
+                        this.time.addEvent({
+                            delay: 500,
+                            callback: () => {
+                                frame = (frame + 1) % 8;
+                                sprite.setFrame(frame);
+                                log(`Showing frame ${frame}`);
+                            },
+                            loop: true
+                        });
+                        
+                        // Try creating an animation
+                        this.anims.create({
+                            key: 'test_anim',
+                            frames: this.anims.generateFrameNumbers(textureKey, {
+                                start: 0,
+                                end: 7
+                            }),
+                            frameRate: 8,
+                            repeat: -1
+                        });
+                        
+                        // Create animated sprite
+                        const animSprite = this.add.sprite(200, 300, textureKey, 0);
+                        animSprite.setScale(4);
+                        animSprite.play('test_anim');
+                        log('Animation created and playing');
+                        
+                    } catch (error) {
+                        log(`Error creating sprite: ${error.message}`);
+                    }
+                } else {
+                    log('Texture not found! Checking available textures...');
+                    const textures = this.textures.list;
+                    Object.keys(textures).forEach(key => {
+                        if (!key.startsWith('__')) {
+                            log(`Available texture: ${key}`);
+                        }
+                    });
+                }
+            }
+        }
+
+        const config = {
+            type: Phaser.AUTO,
+            width: 800,
+            height: 600,
+            parent: 'game-container',
+            backgroundColor: '#1a1a2e',
+            scene: DebugScene
+        };
+
+        const game = new Phaser.Game(config);
+    </script>
+</body>
+</html>

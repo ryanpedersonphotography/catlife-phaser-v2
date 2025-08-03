@@ -69,24 +69,24 @@ export default class TimeManager {
             case 7:
                 // Morning routine starts
                 this.scene.events.emit('morning-routine-start');
-                this.scene.showNotification('Morning routine time! 🌅');
+                this.scene.showNotification('Morning routine time!');
                 break;
                 
             case 8:
             case 18:
                 // Medication times
                 this.scene.events.emit('medication-time', hour);
-                this.scene.showNotification('Medication time! 💊');
+                this.scene.showNotification('Medication time!');
                 break;
                 
             case 12:
                 // Lunch time
-                this.scene.showNotification('Lunch time! Feed the hungry cats 🍽️');
+                this.scene.showNotification('Lunch time! Feed the hungry cats');
                 break;
                 
             case 21:
                 // Evening wind down
-                this.scene.showNotification('Evening time - cats getting sleepy 😴');
+                this.scene.showNotification('Evening time - cats getting sleepy');
                 break;
         }
     }
