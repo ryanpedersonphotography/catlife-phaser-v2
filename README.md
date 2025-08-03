@@ -167,3 +167,7 @@ All 20 cats with their unique characteristics:
 ## Credits
 
 Created as a Phaser.js learning project. Inspired by virtual pet games and cat care simulations.
+
+## License
+
+This project is licensed under the MIT License.
