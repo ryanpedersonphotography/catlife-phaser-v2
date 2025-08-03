@@ -58,15 +58,14 @@ export default class Cat extends GameObjects.Container {
     }
     
     createSprite() {
-        // Get the sprite sheet key based on color
-        const spriteColor = this.scene.scene.get('PreloadScene').getClosestSpriteColor(this.data.color);
-        const spriteSheetKey = `cat_${spriteColor}`;
-        
+        // Get the sprite sheet key based on cat id
+        const spriteSheetKey = `cat_${this.data.id}`;
+
         console.log(`Cat ${this.data.name}: Creating sprite with texture ${spriteSheetKey}`);
-        
+
         // Main sprite using sprite sheet
         this.sprite = this.scene.add.sprite(0, 0, spriteSheetKey);
-        this.sprite.setScale(2); // Scale up 32x32 sprites to appear larger
+        this.sprite.setScale(1); // Sprites are already 64x64
         this.add(this.sprite);
         
         // Name label
