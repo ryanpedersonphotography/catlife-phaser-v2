@@ -1,6 +1,6 @@
 import { Scene } from 'phaser';
 import { COLORS } from '../data/Constants';
-import { getAllCats } from '../data/CatDatabase';
+import { CAT_DATABASE } from '../data/CatDatabase';
 
 export default class PreloadScene extends Scene {
     constructor() {
@@ -57,21 +57,10 @@ export default class PreloadScene extends Scene {
         console.log('PreloadScene: Create phase starting');
         console.log('Loaded textures:', this.textures.list);
         
-        // Check if cat sprites loaded
-        const catColors = ['orange', 'black', 'gray', 'brown', 'pink', 'blue', 'green', 'yellow'];
-        catColors.forEach(color => {
-            const key = `cat_idle_${color}`;
-            console.log(`Texture ${key} exists: ${this.textures.exists(key)}`);
-        });
-        
         console.log('PreloadScene: Generate missing assets');
         // Generate all missing textures (must be done in create, not preload)
         this.generateMissingAssets();
         this.generateRoomBackgrounds();
-        
-        console.log('PreloadScene: Generate proper cat sprites');
-        // Generate cat sprites with proper cat artwork (override the PNG files)
-        this.generateCatSprites();
         
         console.log('PreloadScene: Creating animations');
         // Create animations
@@ -84,34 +73,16 @@ export default class PreloadScene extends Scene {
 
     loadRealAssets() { 
         console.log('LoadRealAssets: Starting to load cat sprite sheets');
-        
-        // Map of cat colors to sprite sheet files
-        const catSpriteSheets = {
-            'orange': 'orange_0.png',
-            'black': 'black_0.png',
-            'gray': 'grey_0.png',
-            'brown': 'brown_0.png',
-            'pink': 'pink_0.png',
-            'blue': 'blue_0.png',
-            'green': 'teal_0.png',  // Using teal as green
-            'yellow': 'yellow_0.png',
-            'white': 'white_0.png',
-            'calico': 'calico_0.png',
-            'red': 'red_0.png'
-        };
-        
-        // Load cat sprite sheets
-        Object.entries(catSpriteSheets).forEach(([color, filename]) => {
-            const key = `cat_${color}`;
-            const path = `cat_assets/${filename}`;
+
+        // Load individual cat sprite sheets
+        Object.values(CAT_DATABASE).forEach(cat => {
+            const key = `cat_${cat.id}`;
+            const path = `assets/sprites/cat_${cat.id}.png`;
             console.log(`Loading sprite sheet: ${key} from ${path}`);
-            
-            // Each sprite sheet has 32x32 pixel sprites in a grid
+
             this.load.spritesheet(key, path, {
-                frameWidth: 32,
-                frameHeight: 32,
-                margin: 0,
-                spacing: 0
+                frameWidth: 64,
+                frameHeight: 64
             });
         });
         
@@ -126,51 +97,6 @@ export default class PreloadScene extends Scene {
         this.load.image('particle_sparkle', 'assets/sprites/particle_sparkle.png');
         this.load.image('icon_heart', 'assets/sprites/icon_heart.png');
     }
-
-    // Map cat colors to available sprite colors
-    getClosestSpriteColor(hexColor) {
-        const colorMap = {
-            '#FF6B6B': 'pink',      // Whiskers - coral to pink
-            '#FF9F1C': 'orange',    // Simba - orange
-            '#9B59B6': 'pink',      // Luna - purple to pink
-            '#F39C12': 'orange',    // Tigger - golden to orange
-            '#7F8C8D': 'gray',      // Smokey - gray
-            '#E74C3C': 'orange',    // Patches - red to orange
-            '#2C3E50': 'gray',      // Shadow - dark gray
-            '#000000': 'black',     // Oreo - black
-            '#ECF0F1': 'gray',      // Mittens - white to gray
-            '#34495E': 'gray',      // Felix - charcoal to gray
-            '#8B4513': 'brown',     // Coco - brown
-            '#5D6D7E': 'gray',      // Pepper - blue-gray
-            '#D35400': 'orange',    // Boots - burnt orange
-            '#F8BBD0': 'pink',      // Bella - pink
-            '#FFAB00': 'orange',    // Milo - amber to orange
-            '#FDD835': 'yellow',    // Nala - yellow
-            '#43A047': 'green',     // Oliver - green
-            '#E91E63': 'pink',      // Roxy - hot pink
-            '#FF5722': 'orange',    // Chester - deep orange
-            '#FDD835': 'yellow'     // Tink - yellow
-        };
-        
-        return colorMap[hexColor] || 'gray';
-    }
-
-    generateCatSprites() {
-        console.log('Setting up cat sprites from loaded sprite sheets...');
-        const cats = getAllCats();
-        
-        cats.forEach(cat => {
-            const spriteColor = this.getClosestSpriteColor(cat.color);
-            const spriteSheetKey = `cat_${spriteColor}`;
-            
-            console.log(`Mapping ${cat.name} (${cat.color}) to sprite sheet: ${spriteSheetKey}`);
-            
-            // Update the cat's texture to use the sprite sheet
-            cat.sprite.texture = spriteSheetKey;
-            cat.spriteSheetKey = spriteSheetKey;
-        });
-    }
-
 
     generateRoomBackgrounds() {
         const rooms = {
@@ -418,55 +344,33 @@ export default class PreloadScene extends Scene {
     
     createAnimations() {
         console.log('Creating animations for cat sprite sheets...');
-        
-        // Create animations for each loaded sprite sheet
-        const catColors = ['orange', 'black', 'gray', 'brown', 'pink', 'blue', 'green', 'yellow', 'white', 'calico', 'red'];
-        
-        catColors.forEach(color => {
-            const spriteKey = `cat_${color}`;
-            
+
+        // Create animations for each cat
+        Object.values(CAT_DATABASE).forEach(cat => {
+            const spriteKey = `cat_${cat.id}`;
+
             if (this.textures.exists(spriteKey)) {
-                // Based on the sprite sheet layout:
-                // Row 1 (frames 0-31): Sitting down
-                // Row 2 (frames 32-63): Looking around  
-                // Row 3 (frames 64-95): Laying down
-                // Row 4 (frames 96-127): Walking
-                // Row 5 (frames 128-159): Running
-                // Row 6 (frames 160-191): Running 2.0
-                
-                // Idle/Sitting animation - use first few frames of sitting
                 this.anims.create({
                     key: `${spriteKey}_idle`,
-                    frames: this.anims.generateFrameNumbers(spriteKey, {
-                        start: 0,
-                        end: 3
-                    }),
-                    frameRate: 4,
-                    repeat: -1
-                });
-                
-                // Walking animation - use walking frames
-                this.anims.create({
-                    key: `${spriteKey}_walk`,
-                    frames: this.anims.generateFrameNumbers(spriteKey, {
-                        start: 96,
-                        end: 103
-                    }),
-                    frameRate: 8,
-                    repeat: -1
-                });
-                
-                // Sleeping/Laying animation - use laying down frames
-                this.anims.create({
-                    key: `${spriteKey}_sleep`,
-                    frames: this.anims.generateFrameNumbers(spriteKey, {
-                        start: 64,
-                        end: 67
-                    }),
+                    frames: this.anims.generateFrameNumbers(spriteKey, { frames: [0, 1] }),
                     frameRate: 2,
                     repeat: -1
                 });
-                
+
+                this.anims.create({
+                    key: `${spriteKey}_walk`,
+                    frames: this.anims.generateFrameNumbers(spriteKey, { frames: [2, 3, 4, 5] }),
+                    frameRate: 8,
+                    repeat: -1
+                });
+
+                this.anims.create({
+                    key: `${spriteKey}_sleep`,
+                    frames: this.anims.generateFrameNumbers(spriteKey, { frames: [6, 7] }),
+                    frameRate: 1,
+                    repeat: -1
+                });
+
                 console.log(`Created animations for ${spriteKey}`);
             }
         });
