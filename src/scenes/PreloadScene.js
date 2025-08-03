@@ -158,16 +158,19 @@ export default class PreloadScene extends Scene {
     generateCatSprites() {
         console.log('Setting up cat sprites from loaded sprite sheets...');
         const cats = getAllCats();
-        
+
         cats.forEach(cat => {
             const spriteColor = this.getClosestSpriteColor(cat.color);
             const spriteSheetKey = `cat_${spriteColor}`;
-            
-            console.log(`Mapping ${cat.name} (${cat.color}) to sprite sheet: ${spriteSheetKey}`);
-            
-            // Update the cat's texture to use the sprite sheet
-            cat.sprite.texture = spriteSheetKey;
-            cat.spriteSheetKey = spriteSheetKey;
+
+            // Only update the texture if it differs from the desired sprite sheet
+            if (cat.sprite.texture !== spriteSheetKey) {
+                console.log(`Updating ${cat.name} texture from ${cat.sprite.texture} to ${spriteSheetKey}`);
+                cat.sprite.texture = spriteSheetKey;
+            }
+
+            // Keep a reference to the sprite sheet key for animations
+            cat.spriteSheetKey = cat.sprite.texture;
         });
     }
 
