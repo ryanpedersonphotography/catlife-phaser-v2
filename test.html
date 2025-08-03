@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Phaser Test</title>
+</head>
+<body>
+    <div id="game-container"></div>
+    <script src="bundle.js"></script>
+    <script>
+        // Add debugging
+        console.log('Page loaded, checking for Phaser...');
+        setTimeout(() => {
+            console.log('Phaser available?', typeof Phaser !== 'undefined');
+            console.log('Game instance?', window.game);
+        }, 1000);
+    </script>
+</body>
+</html>

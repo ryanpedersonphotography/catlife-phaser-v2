@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Phaser Loading</title>
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3.70.0/dist/phaser.js"></script>
+    <style>
+        body { margin: 0; padding: 20px; font-family: Arial; }
+        #log { background: #f0f0f0; padding: 10px; margin-top: 20px; }
+        .error { color: red; }
+        .success { color: green; }
+    </style>
+</head>
+<body>
+    <h1>Phaser Asset Loading Test</h1>
+    <div id="phaser-game"></div>
+    <div id="log"></div>
+    
+    <script>
+        const log = document.getElementById('log');
+        
+        function addLog(message, type = '') {
+            const entry = document.createElement('div');
+            entry.className = type;
+            entry.textContent = `${new Date().toLocaleTimeString()}: ${message}`;
+            log.appendChild(entry);
+        }
+        
+        class TestScene extends Phaser.Scene {
+            constructor() {
+                super({ key: 'TestScene' });
+            }
+            
+            preload() {
+                addLog('Starting preload...');
+                
+                // Set up load events
+                this.load.on('loaderror', (file) => {
+                    addLog(`Failed to load: ${file.key} from ${file.url}`, 'error');
+                });
+                
+                this.load.on('filecomplete', (key, type, data) => {
+                    addLog(`Loaded: ${key} (${type})`, 'success');
+                });
+                
+                this.load.on('complete', () => {
+                    addLog('All assets loaded!', 'success');
+                });
+                
+                // Try loading the assets that exist
+                const existingAssets = [
+                    'cat_whiskers', 'cat_simba', 'cat_luna', 'cat_tigger', 'cat_smokey',
+                    'cat_patches', 'cat_shadow', 'cat_oreo', 'cat_mittens', 'cat_felix',
+                    'cat_coco', 'cat_pepper', 'cat_boots', 'cat_bella', 'cat_milo',
+                    'cat_nala', 'cat_oliver', 'cat_roxy', 'cat_chester', 'cat_tink'
+                ];
+                
+                // Load cat sprites
+                existingAssets.forEach(cat => {
+                    addLog(`Attempting to load ${cat}...`);
+                    this.load.spritesheet(cat, `assets/sprites/${cat}.png`, {
+                        frameWidth: 64,
+                        frameHeight: 64
+                    });
+                });
+                
+                // Load other assets
+                this.load.image('food_bowl_empty', 'assets/sprites/food_bowl_empty.png');
+                this.load.image('litter_box_clean', 'assets/sprites/litter_box_clean.png');
+                this.load.image('ui_panel', 'assets/sprites/ui_panel.png');
+                this.load.image('particle_star', 'assets/sprites/particle_star.png');
+                this.load.image('particle_heart', 'assets/sprites/particle_heart.png');
+                this.load.image('particle_sparkle', 'assets/sprites/particle_sparkle.png');
+                this.load.image('icon_heart', 'assets/sprites/icon_heart.png');
+            }
+            
+            create() {
+                addLog('Create method called - loading complete!', 'success');
+                this.add.text(400, 300, 'Assets Loaded Successfully!', { fontSize: '32px', color: '#00ff00' }).setOrigin(0.5);
+            }
+        }
+        
+        const config = {
+            type: Phaser.AUTO,
+            width: 800,
+            height: 600,
+            parent: 'phaser-game',
+            scene: TestScene
+        };
+        
+        const game = new Phaser.Game(config);
+        addLog('Phaser game created');
+    </script>
+</body>
+</html>

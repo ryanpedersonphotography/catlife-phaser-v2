@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cat Sprite Test</title>
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3.70.0/dist/phaser.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background: #222;
+            color: white;
+            font-family: Arial, sans-serif;
+        }
+        #info {
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div id="info">
+        <h2>Cat Sprite Animation Test</h2>
+        <p>Testing all cat sprites with proper 8-frame animations</p>
+        <p>Click cats to cycle through animation states: Idle → Walk → Sleep</p>
+    </div>
+    <div id="game-container"></div>
+
+    <script>
+        const catData = [
+            'whiskers', 'simba', 'luna', 'tigger', 'smokey', 'patches', 
+            'shadow', 'oreo', 'mittens', 'felix', 'coco', 'pepper', 
+            'boots', 'bella', 'milo', 'nala', 'oliver', 'roxy', 'chester', 'tink'
+        ];
+
+        const animationStates = ['idle', 'walk', 'sleep'];
+        let currentStateIndex = 0;
+
+        class TestScene extends Phaser.Scene {
+            constructor() {
+                super({ key: 'TestScene' });
+                this.cats = [];
+            }
+
+            preload() {
+                // Load all cat sprites
+                catData.forEach(catId => {
+                    this.load.spritesheet(`cat_${catId}`, `assets/sprites/cat_${catId}.png`, {
+                        frameWidth: 64,
+                        frameHeight: 64
+                    });
+                });
+            }
+
+            create() {
+                // Create animations for each cat
+                catData.forEach(catId => {
+                    this.anims.create({
+                        key: `${catId}_idle`,
+                        frames: this.anims.generateFrameNumbers(`cat_${catId}`, { frames: [0, 1] }),
+                        frameRate: 2,
+                        repeat: -1
+                    });
+
+                    this.anims.create({
+                        key: `${catId}_walk`,
+                        frames: this.anims.generateFrameNumbers(`cat_${catId}`, { frames: [2, 3, 4, 5] }),
+                        frameRate: 8,
+                        repeat: -1
+                    });
+
+                    this.anims.create({
+                        key: `${catId}_sleep`,
+                        frames: this.anims.generateFrameNumbers(`cat_${catId}`, { frames: [6, 7] }),
+                        frameRate: 1,
+                        repeat: -1
+                    });
+                });
+
+                // Create cat sprites in a grid
+                const cols = 5;
+                const startX = 100;
+                const startY = 100;
+                const spacingX = 120;
+                const spacingY = 120;
+
+                catData.forEach((catId, index) => {
+                    const col = index % cols;
+                    const row = Math.floor(index / cols);
+                    const x = startX + col * spacingX;
+                    const y = startY + row * spacingY;
+
+                    const cat = this.add.sprite(x, y, `cat_${catId}`);
+                    cat.play(`${catId}_idle`);
+                    cat.setInteractive();
+                    cat.catId = catId;
+
+                    // Add name label
+                    this.add.text(x, y + 40, catId, {
+                        fontSize: '12px',
+                        color: '#ffffff',
+                        stroke: '#000000',
+                        strokeThickness: 2
+                    }).setOrigin(0.5);
+
+                    this.cats.push(cat);
+                });
+
+                // Click handler to cycle animations
+                this.input.on('gameobjectdown', (pointer, gameObject) => {
+                    if (gameObject.catId) {
+                        currentStateIndex = (currentStateIndex + 1) % animationStates.length;
+                        const state = animationStates[currentStateIndex];
+                        gameObject.play(`${gameObject.catId}_${state}`);
+                        
+                        console.log(`${gameObject.catId} playing ${state} animation`);
+                    }
+                });
+
+                // Instructions
+                this.add.text(400, 50, 'Cat Sprite Test - Click any cat to cycle animations', {
+                    fontSize: '16px',
+                    color: '#ffffff'
+                }).setOrigin(0.5);
+            }
+        }
+
+        const config = {
+            type: Phaser.AUTO,
+            width: 1000,
+            height: 600,
+            parent: 'game-container',
+            backgroundColor: '#2c3e50',
+            scene: TestScene
+        };
+
+        const game = new Phaser.Game(config);
+    </script>
+</body>
+</html>

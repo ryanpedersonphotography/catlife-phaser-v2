@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Debug Cat Visibility</title>
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3.70.0/dist/phaser.js"></script>
+    <style>
+        body { margin: 0; padding: 20px; font-family: Arial; }
+        #log { background: #f0f0f0; padding: 10px; margin-top: 20px; height: 200px; overflow-y: auto; }
+        .error { color: red; }
+        .success { color: green; }
+        .info { color: blue; }
+    </style>
+</head>
+<body>
+    <h1>Cat Sprite Visibility Debug</h1>
+    <div id="phaser-game"></div>
+    <div id="log"></div>
+    
+    <script type="module">
+        import { CAT_DATABASE } from './src/data/CatDatabase.js';
+        
+        const log = document.getElementById('log');
+        
+        function addLog(message, type = '') {
+            const entry = document.createElement('div');
+            entry.className = type;
+            entry.textContent = `${new Date().toLocaleTimeString()}: ${message}`;
+            log.appendChild(entry);
+            log.scrollTop = log.scrollHeight;
+        }
+        
+        class DebugScene extends Phaser.Scene {
+            constructor() {
+                super({ key: 'DebugScene' });
+            }
+            
+            preload() {
+                addLog('Starting preload...', 'info');
+                
+                // Set up error handling
+                this.load.on('loaderror', (file) => {
+                    addLog(`Failed to load: ${file.key}`, 'error');
+                });
+                
+                this.load.on('complete', () => {
+                    addLog('Preload complete', 'success');
+                });
+            }
+            
+            create() {
+                addLog('Starting create...', 'info');
+                
+                // Generate cat sprites
+                this.generateCatSprites();
+                
+                // Display cats in a grid
+                let x = 100;
+                let y = 100;
+                let col = 0;
+                
+                Object.values(CAT_DATABASE).forEach((catData, index) => {
+                    try {
+                        // Check if texture exists
+                        const textureKey = catData.sprite.texture;
+                        const texture = this.textures.exists(textureKey);
+                        addLog(`Texture ${textureKey} exists: ${texture}`, texture ? 'success' : 'error');
+                        
+                        if (texture) {
+                            // Create sprite
+                            const sprite = this.add.sprite(x, y, textureKey);
+                            sprite.setFrame(0);
+                            
+                            // Add name
+                            this.add.text(x, y + 40, catData.name, {
+                                fontSize: '12px',
+                                color: '#000000'
+                            }).setOrigin(0.5);
+                            
+                            addLog(`Created sprite for ${catData.name}`, 'success');
+                        }
+                        
+                        // Grid layout
+                        col++;
+                        if (col >= 5) {
+                            col = 0;
+                            x = 100;
+                            y += 100;
+                        } else {
+                            x += 150;
+                        }
+                    } catch (error) {
+                        addLog(`Error creating ${catData.name}: ${error.message}`, 'error');
+                    }
+                });
+                
+                addLog('Scene creation complete', 'success');
+            }
+            
+            generateCatSprites() {
+                addLog('Generating cat sprites...', 'info');
+                
+                Object.values(CAT_DATABASE).forEach(cat => {
+                    try {
+                        const graphics = this.make.graphics({ x: 0, y: 0 }, false);
+                        
+                        // Simple cat shape for testing
+                        const color = Phaser.Display.Color.HexStringToColor(cat.color).color;
+                        
+                        // Body
+                        graphics.fillStyle(color, 1);
+                        graphics.fillCircle(32, 32, 20);
+                        
+                        // Head
+                        graphics.fillCircle(32, 15, 15);
+                        
+                        // Ears
+                        graphics.fillTriangle(20, 5, 25, 15, 15, 15);
+                        graphics.fillTriangle(44, 5, 39, 15, 49, 15);
+                        
+                        // Generate texture
+                        graphics.generateTexture(cat.sprite.texture, 64, 64);
+                        graphics.destroy();
+                        
+                        addLog(`Generated texture for ${cat.name}`, 'success');
+                    } catch (error) {
+                        addLog(`Failed to generate ${cat.name}: ${error.message}`, 'error');
+                    }
+                });
+            }
+        }
+        
+        const config = {
+            type: Phaser.AUTO,
+            width: 800,
+            height: 600,
+            backgroundColor: '#ffffff',
+            parent: 'phaser-game',
+            scene: DebugScene
+        };
+        
+        addLog('Creating Phaser game...', 'info');
+        const game = new Phaser.Game(config);
+    </script>
+</body>
+</html>

@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Asset Debug</title>
+</head>
+<body>
+    <h1>Asset Loading Debug</h1>
+    <div id="results"></div>
+    
+    <script>
+        const assets = [
+            'assets/sprites/cat_whiskers.png',
+            'assets/sprites/cat_simba.png',
+            'assets/sprites/cat_luna.png',
+            'assets/sprites/cat_tigger.png',
+            'assets/sprites/cat_smokey.png',
+            'assets/sprites/cat_patches.png',
+            'assets/sprites/cat_shadow.png',
+            'assets/sprites/cat_oreo.png',
+            'assets/sprites/cat_mittens.png',
+            'assets/sprites/cat_felix.png',
+            'assets/sprites/cat_coco.png',
+            'assets/sprites/cat_pepper.png',
+            'assets/sprites/cat_boots.png',
+            'assets/sprites/cat_bella.png',
+            'assets/sprites/cat_milo.png',
+            'assets/sprites/cat_nala.png',
+            'assets/sprites/cat_oliver.png',
+            'assets/sprites/cat_roxy.png',
+            'assets/sprites/cat_chester.png',
+            'assets/sprites/cat_tink.png',
+            'assets/sprites/food_bowl_empty.png',
+            'assets/sprites/litter_box_clean.png',
+            'assets/sprites/ui_panel.png',
+            'assets/sprites/particle_star.png',
+            'assets/sprites/particle_heart.png',
+            'assets/sprites/particle_sparkle.png',
+            'assets/sprites/icon_heart.png'
+        ];
+        
+        const results = document.getElementById('results');
+        
+        async function checkAssets() {
+            for (const asset of assets) {
+                try {
+                    const response = await fetch(asset);
+                    const status = response.ok ? '✅ OK' : `❌ ${response.status}`;
+                    results.innerHTML += `<div>${asset}: ${status}</div>`;
+                } catch (error) {
+                    results.innerHTML += `<div>${asset}: ❌ ERROR - ${error.message}</div>`;
+                }
+            }
+        }
+        
+        checkAssets();
+    </script>
+</body>
+</html>

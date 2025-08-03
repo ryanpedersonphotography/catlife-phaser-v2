@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cat Life - Fixed Loading Test</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+            background: #2d3748;
+            color: white;
+        }
+        #game-container {
+            border: 2px solid #4a5568;
+            display: inline-block;
+            position: relative;
+        }
+        #debug-info {
+            margin-top: 20px;
+            background: #1a202c;
+            padding: 10px;
+            border-radius: 5px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .status {
+            margin: 5px 0;
+            padding: 5px;
+            border-radius: 3px;
+        }
+        .success { background: #22543d; }
+        .error { background: #742a2a; }
+        .info { background: #2d3748; }
+        
+        #loading-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            transition: opacity 0.5s ease;
+        }
+        
+        #loading-screen.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+        
+        .loading-content {
+            text-align: center;
+            color: white;
+        }
+        
+        .loading-bar-container {
+            width: 300px;
+            height: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 20px auto;
+        }
+        
+        #loading-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #fff 0%, #f0f0f0 100%);
+            width: 0%;
+            transition: width 0.3s ease;
+            border-radius: 10px;
+        }
+        
+        #loading-text {
+            margin-top: 10px;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Cat Life - Fixed Asset Loading Test</h1>
+    <div id="game-container">
+        <div id="loading-screen">
+            <div class="loading-content">
+                <div style="font-size: 60px; margin-bottom: 20px;">🐱</div>
+                <h1 style="margin: 0 0 10px 0;">Cat Life</h1>
+                <p style="margin: 0 0 20px 0;">Loading...</p>
+                <div class="loading-bar-container">
+                    <div id="loading-bar"></div>
+                </div>
+                <p id="loading-text">Initializing...</p>
+            </div>
+        </div>
+    </div>
+    
+    <div id="debug-info">
+        <h3>Loading Status</h3>
+        <div id="status-list"></div>
+    </div>
+
+    <script type="module">
+        import './src/main.js';
+        
+        const statusList = document.getElementById('status-list');
+        
+        function addStatus(message, type = 'info') {
+            const div = document.createElement('div');
+            div.className = `status ${type}`;
+            div.textContent = `${new Date().toLocaleTimeString()}: ${message}`;
+            statusList.appendChild(div);
+            statusList.scrollTop = statusList.scrollHeight;
+        }
+        
+        // Capture console output
+        const originalLog = console.log;
+        const originalError = console.error;
+        
+        console.log = function(...args) {
+            originalLog.apply(console, args);
+            addStatus('[LOG] ' + args.join(' '), 'info');
+        };
+        
+        console.error = function(...args) {
+            originalError.apply(console, args);
+            addStatus('[ERROR] ' + args.join(' '), 'error');
+        };
+        
+        // Monitor game loading
+        window.addEventListener('load', () => {
+            addStatus('Window loaded, initializing game...', 'info');
+            
+            // Check if game starts properly
+            setTimeout(() => {
+                if (window.game) {
+                    addStatus('Game instance created successfully!', 'success');
+                    
+                    // Check scenes
+                    const scenes = window.game.scene.scenes;
+                    addStatus(`Game has ${scenes.length} scenes loaded`, 'info');
+                    
+                    // Check if PreloadScene is active
+                    if (window.game.scene.isActive('PreloadScene')) {
+                        addStatus('PreloadScene is active - loading assets...', 'info');
+                    } else if (window.game.scene.isActive('MainMenuScene')) {
+                        addStatus('MainMenuScene is active - loading complete!', 'success');
+                    } else {
+                        addStatus('Unknown scene state', 'error');
+                    }
+                } else {
+                    addStatus('Game instance not found!', 'error');
+                }
+            }, 2000);
+            
+            // Extended check
+            setTimeout(() => {
+                if (window.game && window.game.textures) {
+                    const textures = Object.keys(window.game.textures.list);
+                    addStatus(`Loaded ${textures.length} textures: ${textures.slice(0, 5).join(', ')}${textures.length > 5 ? '...' : ''}`, 'success');
+                }
+            }, 5000);
+        });
+    </script>
+</body>
+</html>

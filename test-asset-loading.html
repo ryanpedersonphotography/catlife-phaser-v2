@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cat Life - Asset Loading Test</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+            background: #2d3748;
+            color: white;
+        }
+        #game-container {
+            border: 2px solid #4a5568;
+            display: inline-block;
+        }
+        #debug-info {
+            margin-top: 20px;
+            background: #1a202c;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .asset-status {
+            margin: 5px 0;
+            padding: 5px;
+            border-radius: 3px;
+        }
+        .loaded { background: #22543d; }
+        .failed { background: #742a2a; }
+        .pending { background: #744210; }
+    </style>
+</head>
+<body>
+    <h1>Cat Life - Asset Loading Test</h1>
+    <div id="game-container"></div>
+    
+    <div id="debug-info">
+        <h3>Asset Loading Status</h3>
+        <div id="asset-list"></div>
+        <h3>Console Output</h3>
+        <pre id="console-output"></pre>
+    </div>
+
+    <script type="module">
+        import './src/main.js';
+        
+        // Capture console output
+        const consoleOutput = document.getElementById('console-output');
+        const originalLog = console.log;
+        const originalError = console.error;
+        
+        console.log = function(...args) {
+            originalLog.apply(console, args);
+            consoleOutput.textContent += '[LOG] ' + args.join(' ') + '\n';
+            consoleOutput.scrollTop = consoleOutput.scrollHeight;
+        };
+        
+        console.error = function(...args) {
+            originalError.apply(console, args);
+            consoleOutput.textContent += '[ERROR] ' + args.join(' ') + '\n';
+            consoleOutput.scrollTop = consoleOutput.scrollHeight;
+        };
+        
+        // Monitor asset loading
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                const game = window.game;
+                if (game) {
+                    const preloadScene = game.scene.getScene('PreloadScene');
+                    if (preloadScene && preloadScene.load) {
+                        const assetList = document.getElementById('asset-list');
+                        
+                        // Check texture cache
+                        const textures = game.textures.list;
+                        Object.keys(textures).forEach(key => {
+                            if (key !== '__DEFAULT' && key !== '__MISSING') {
+                                const div = document.createElement('div');
+                                div.className = 'asset-status loaded';
+                                div.textContent = `✓ Texture: ${key}`;
+                                assetList.appendChild(div);
+                            }
+                        });
+                        
+                        // Check animation cache
+                        if (game.anims && game.anims.anims) {
+                            const anims = game.anims.anims.entries;
+                            Object.keys(anims).forEach(key => {
+                                const div = document.createElement('div');
+                                div.className = 'asset-status loaded';
+                                div.textContent = `✓ Animation: ${key}`;
+                                assetList.appendChild(div);
+                            });
+                        }
+                    }
+                }
+            }, 3000);
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Cat Generation</title>
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3.70.0/dist/phaser.js"></script>
+    <style>
+        body { margin: 0; padding: 20px; font-family: Arial; background: #222; }
+        #phaser-game { border: 2px solid #444; }
+    </style>
+</head>
+<body>
+    <div id="phaser-game"></div>
+    
+    <script type="module">
+        import { getAllCats } from './src/data/CatDatabase.js';
+        
+        class TestScene extends Phaser.Scene {
+            constructor() {
+                super({ key: 'TestScene' });
+            }
+            
+            create() {
+                // White background
+                this.cameras.main.setBackgroundColor('#ffffff');
+                
+                // Generate and display a simple cat
+                const graphics = this.make.graphics({ x: 0, y: 0 }, false);
+                
+                // Draw a simple cat shape
+                graphics.fillStyle(0xFF6B6B, 1); // Red color
+                
+                // Body
+                graphics.fillCircle(200, 200, 30);
+                
+                // Head
+                graphics.fillCircle(200, 170, 20);
+                
+                // Ears
+                graphics.fillTriangle(185, 155, 190, 165, 180, 165);
+                graphics.fillTriangle(215, 155, 210, 165, 220, 165);
+                
+                // Generate texture
+                graphics.generateTexture('test_cat', 400, 400);
+                graphics.destroy();
+                
+                // Create sprite from texture
+                const testSprite = this.add.sprite(200, 200, 'test_cat');
+                
+                // Also test cat sprite generation like in PreloadScene
+                this.generateTestCats();
+            }
+            
+            generateTestCats() {
+                const cats = getAllCats();
+                let x = 100;
+                let y = 350;
+                
+                cats.forEach((cat, index) => {
+                    if (index < 5) { // Just show first 5 cats
+                        const graphics = this.make.graphics({ x: 0, y: 0 }, false);
+                        
+                        // Draw simple cat
+                        const color = Phaser.Display.Color.HexStringToColor(cat.color).color;
+                        graphics.fillStyle(color, 1);
+                        
+                        // Body
+                        graphics.fillCircle(32, 32, 20);
+                        // Head
+                        graphics.fillCircle(32, 15, 15);
+                        
+                        // Generate individual texture
+                        graphics.generateTexture(`simple_${cat.id}`, 64, 64);
+                        graphics.destroy();
+                        
+                        // Create sprite
+                        const sprite = this.add.sprite(x, y, `simple_${cat.id}`);
+                        
+                        // Add name
+                        this.add.text(x, y + 40, cat.name, {
+                            fontSize: '12px',
+                            color: '#ffffff',
+                            stroke: '#000000',
+                            strokeThickness: 2
+                        }).setOrigin(0.5);
+                        
+                        x += 100;
+                    }
+                });
+            }
+        }
+        
+        const config = {
+            type: Phaser.AUTO,
+            width: 800,
+            height: 600,
+            parent: 'phaser-game',
+            scene: TestScene
+        };
+        
+        const game = new Phaser.Game(config);
+    </script>
+</body>
+</html>

@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test New Cat Sprites</title>
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3.70.0/dist/phaser.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background: #2c3e50;
+            color: white;
+            font-family: Arial, sans-serif;
+        }
+        #game-container {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        h1 {
+            text-align: center;
+        }
+        .info {
+            text-align: center;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>New Cat Sprites Test</h1>
+    <div class="info">Testing all cat sprite variations and animations</div>
+    <div id="game-container"></div>
+
+    <script>
+        class TestScene extends Phaser.Scene {
+            constructor() {
+                super({ key: 'TestScene' });
+            }
+
+            preload() {
+                // Load all cat sprites
+                const catColors = ['orange', 'black', 'gray', 'brown', 'pink', 'blue', 'green', 'yellow'];
+                
+                catColors.forEach(color => {
+                    this.load.image(`cat_idle_${color}`, `assets/sprites/cat-idle-${color}.png`);
+                });
+                
+                this.load.image('cat_sleeping_orange', 'assets/sprites/cat-sleeping-orange.png');
+                this.load.image('cat_walk_frame1_orange', 'assets/sprites/cat-walk-frame1-orange.png');
+                this.load.image('cat_walk_frame2_orange', 'assets/sprites/cat-walk-frame2-orange.png');
+            }
+
+            create() {
+                // Display all idle sprites
+                const catColors = ['orange', 'black', 'gray', 'brown', 'pink', 'blue', 'green', 'yellow'];
+                
+                // Title
+                this.add.text(400, 30, 'Cat Sprite Showcase', {
+                    fontSize: '24px',
+                    fontStyle: 'bold'
+                }).setOrigin(0.5);
+
+                // Idle sprites
+                this.add.text(400, 80, 'Idle Sprites (All Colors)', {
+                    fontSize: '18px'
+                }).setOrigin(0.5);
+
+                catColors.forEach((color, index) => {
+                    const x = 100 + (index % 4) * 150;
+                    const y = 150 + Math.floor(index / 4) * 120;
+                    
+                    const sprite = this.add.image(x, y, `cat_idle_${color}`);
+                    this.add.text(x, y + 40, color, {
+                        fontSize: '14px'
+                    }).setOrigin(0.5);
+                });
+
+                // Walking animation
+                this.add.text(400, 400, 'Walking Animation (Orange)', {
+                    fontSize: '18px'
+                }).setOrigin(0.5);
+
+                // Create walking cat
+                this.walkingCat = this.add.sprite(200, 450, 'cat_walk_frame1_orange');
+                
+                // Animate between walk frames
+                this.time.addEvent({
+                    delay: 200,
+                    callback: () => {
+                        if (this.walkingCat.texture.key === 'cat_walk_frame1_orange') {
+                            this.walkingCat.setTexture('cat_walk_frame2_orange');
+                        } else {
+                            this.walkingCat.setTexture('cat_walk_frame1_orange');
+                        }
+                    },
+                    loop: true
+                });
+
+                // Move the walking cat
+                this.tweens.add({
+                    targets: this.walkingCat,
+                    x: 600,
+                    duration: 3000,
+                    yoyo: true,
+                    repeat: -1
+                });
+
+                // Sleeping sprite
+                this.add.text(400, 550, 'Sleeping Sprite (Orange)', {
+                    fontSize: '18px'
+                }).setOrigin(0.5);
+
+                this.add.image(400, 600, 'cat_sleeping_orange');
+            }
+        }
+
+        const config = {
+            type: Phaser.AUTO,
+            width: 800,
+            height: 700,
+            parent: 'game-container',
+            backgroundColor: '#34495e',
+            scene: TestScene
+        };
+
+        const game = new Phaser.Game(config);
+    </script>
+</body>
+</html>

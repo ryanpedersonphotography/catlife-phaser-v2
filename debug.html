@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Cat Life Debug</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+        }
+        #debug-info {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 12px;
+            z-index: 1000;
+        }
+    </style>
+</head>
+<body>
+    <div id="debug-info">
+        <div>Phaser Loaded: <span id="phaser-status">Checking...</span></div>
+        <div>Game Created: <span id="game-status">No</span></div>
+        <div>Current Scene: <span id="scene-status">None</span></div>
+        <div>Console Errors: <span id="error-count">0</span></div>
+    </div>
+    
+    <div id="game-container"></div>
+    
+    <script>
+        let errorCount = 0;
+        window.addEventListener('error', (e) => {
+            errorCount++;
+            document.getElementById('error-count').textContent = errorCount;
+            console.error('Error caught:', e);
+        });
+    </script>
+    
+    <script src="bundle.js"></script>
+    
+    <script>
+        // Debug monitoring
+        function updateDebug() {
+            document.getElementById('phaser-status').textContent = 
+                typeof Phaser !== 'undefined' ? 'Yes' : 'No';
+            
+            if (window.game) {
+                document.getElementById('game-status').textContent = 'Yes';
+                
+                const scenes = window.game.scene.getScenes(true);
+                if (scenes.length > 0) {
+                    document.getElementById('scene-status').textContent = 
+                        scenes.map(s => s.sys.settings.key).join(', ');
+                }
+            }
+        }
+        
+        setInterval(updateDebug, 500);
+        
+        // Log when game starts
+        window.addEventListener('load', () => {
+            console.log('=== Page Load Complete ===');
+            console.log('Phaser available:', typeof Phaser !== 'undefined');
+            console.log('Game config available:', typeof config !== 'undefined');
+            
+            setTimeout(() => {
+                console.log('=== After 2 seconds ===');
+                console.log('Game instance:', window.game);
+                if (window.game) {
+                    console.log('Active scenes:', window.game.scene.getScenes(true));
+                }
+            }, 2000);
+        });
+    </script>
+</body>
+</html>

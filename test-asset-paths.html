@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Asset Path Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+        .asset-test {
+            margin: 10px 0;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        .success {
+            background-color: #d4edda;
+            border-color: #c3e6cb;
+        }
+        .error {
+            background-color: #f8d7da;
+            border-color: #f5c6cb;
+        }
+        img {
+            max-width: 50px;
+            max-height: 50px;
+            margin-left: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Cat Life Asset Path Test</h1>
+    <div id="results"></div>
+
+    <script>
+        const assets = [
+            'cat_assets/orange_0.png',
+            'cat_assets/black_0.png',
+            'cat_assets/grey_0.png',
+            'assets/sprites/food_bowl_empty.png',
+            'assets/sprites/litter_box_clean.png',
+            'assets/sprites/ui_panel.png',
+            'assets/sprites/particle_star.png',
+            'assets/sprites/icon_heart.png'
+        ];
+
+        const resultsDiv = document.getElementById('results');
+
+        assets.forEach(assetPath => {
+            const div = document.createElement('div');
+            div.className = 'asset-test';
+            
+            const img = new Image();
+            img.src = assetPath;
+            
+            img.onload = function() {
+                div.className += ' success';
+                div.innerHTML = `✅ ${assetPath} - Loaded successfully`;
+                div.appendChild(img);
+            };
+            
+            img.onerror = function() {
+                div.className += ' error';
+                div.innerHTML = `❌ ${assetPath} - Failed to load`;
+            };
+            
+            resultsDiv.appendChild(div);
+        });
+    </script>
+</body>
+</html>
