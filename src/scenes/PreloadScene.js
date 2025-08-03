@@ -106,10 +106,10 @@ export default class PreloadScene extends Scene {
             const path = `cat_assets/${filename}`;
             console.log(`Loading sprite sheet: ${key} from ${path}`);
             
-            // Each sprite sheet has 32x32 pixel sprites in a grid
+            // Each sprite sheet has 8 frames of 64x64 pixels in a single row
             this.load.spritesheet(key, path, {
-                frameWidth: 32,
-                frameHeight: 32,
+                frameWidth: 64,
+                frameHeight: 64,
                 margin: 0,
                 spacing: 0
             });
@@ -426,47 +426,44 @@ export default class PreloadScene extends Scene {
             const spriteKey = `cat_${color}`;
             
             if (this.textures.exists(spriteKey)) {
-                // Based on the sprite sheet layout:
-                // Row 1 (frames 0-31): Sitting down
-                // Row 2 (frames 32-63): Looking around  
-                // Row 3 (frames 64-95): Laying down
-                // Row 4 (frames 96-127): Walking
-                // Row 5 (frames 128-159): Running
-                // Row 6 (frames 160-191): Running 2.0
-                
-                // Idle/Sitting animation - use first few frames of sitting
+                // Sprite sheet layout:
+                // Frames 0-1: Idle
+                // Frames 2-5: Walking
+                // Frames 6-7: Sleeping
+
+                // Idle animation - first two frames
                 this.anims.create({
                     key: `${spriteKey}_idle`,
                     frames: this.anims.generateFrameNumbers(spriteKey, {
                         start: 0,
-                        end: 3
+                        end: 1
                     }),
                     frameRate: 4,
                     repeat: -1
                 });
-                
-                // Walking animation - use walking frames
+
+                // Walking animation - next four frames
                 this.anims.create({
                     key: `${spriteKey}_walk`,
                     frames: this.anims.generateFrameNumbers(spriteKey, {
-                        start: 96,
-                        end: 103
+                        start: 2,
+                        end: 5
                     }),
                     frameRate: 8,
                     repeat: -1
                 });
-                
-                // Sleeping/Laying animation - use laying down frames
+
+                // Sleeping animation - final two frames
                 this.anims.create({
                     key: `${spriteKey}_sleep`,
                     frames: this.anims.generateFrameNumbers(spriteKey, {
-                        start: 64,
-                        end: 67
+                        start: 6,
+                        end: 7
                     }),
                     frameRate: 2,
                     repeat: -1
                 });
-                
+
                 console.log(`Created animations for ${spriteKey}`);
             }
         });
