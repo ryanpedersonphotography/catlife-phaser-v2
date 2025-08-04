@@ -420,106 +420,132 @@ export default class PreloadScene extends Scene {
             const spriteKey = `cat_${catName}`;
             
             if (this.textures.exists(spriteKey)) {
-                // Idle sitting (skip first 2 frames to avoid blinking)
+                const texture = this.textures.get(spriteKey);
+                const frameTotal = texture.frameTotal;
+                
+                // Debug: Log sprite sheet info
+                console.log(`Sprite sheet ${spriteKey}:`);
+                console.log(`  Total frames: ${frameTotal}`);
+                console.log(`  Source dimensions: ${texture.source[0].width}x${texture.source[0].height}`);
+                console.log(`  Frame dimensions: 32x30`);
+                console.log(`  Calculated columns: ${Math.floor(texture.source[0].width / 32)}`);
+                console.log(`  Calculated rows: ${Math.floor(texture.source[0].height / 30)}`);
+                
+                // The sprite sheets are 1024x480 pixels
+                // At 32x30 per frame, that's 32 columns x 16 rows = 512 frames total
+                // But we need to check which frames actually have cat sprites
+                
+                // Based on standard cat sprite sheet layout, let's use simpler animations
+                // Most sprite sheets have these basic animations in the first few rows:
+                
+                // Row 0 (frames 0-31): Idle/sitting animations
+                // Use frames 0-3 for a simple idle animation
                 this.anims.create({
                     key: `${spriteKey}_idle`,
                     frames: this.anims.generateFrameNumbers(spriteKey, {
-                        start: 2,
-                        end: 7
+                        start: 0,
+                        end: 3
                     }),
-                    frameRate: 3,
+                    frameRate: 4,
                     repeat: -1
                 });
                 
-                // Idle standing
+                // Row 1 (frames 32-63): Standing idle
+                // Use frames 32-35 for standing idle
                 this.anims.create({
                     key: `${spriteKey}_idle_stand`,
                     frames: this.anims.generateFrameNumbers(spriteKey, {
-                        start: 34,
-                        end: 39
+                        start: 32,
+                        end: 35
                     }),
-                    frameRate: 3,
+                    frameRate: 4,
                     repeat: -1
                 });
                 
-                // Walking
+                // Row 2 (frames 64-95): Walking animation
+                // Use frames 64-67 for walking (4 frame walk cycle)
                 this.anims.create({
                     key: `${spriteKey}_walk`,
                     frames: this.anims.generateFrameNumbers(spriteKey, {
                         start: 64,
-                        end: 71
+                        end: 67
                     }),
                     frameRate: 8,
                     repeat: -1
                 });
                 
-                // Running
+                // Row 3 (frames 96-127): Running animation
+                // Use frames 96-99 for running
                 this.anims.create({
                     key: `${spriteKey}_run`,
                     frames: this.anims.generateFrameNumbers(spriteKey, {
                         start: 96,
-                        end: 103
+                        end: 99
                     }),
                     frameRate: 12,
                     repeat: -1
                 });
                 
-                // Sleeping (gentle breathing loop)
-                this.anims.create({
-                    key: `${spriteKey}_sleep`,
-                    frames: this.anims.generateFrameNumbers(spriteKey, {
-                        start: 160,
-                        end: 163
-                    }),
-                    frameRate: 2,
-                    repeat: -1
-                });
-                
-                // Grooming
+                // Row 4 (frames 128-159): Grooming
+                // Use frames 128-131 for grooming
                 this.anims.create({
                     key: `${spriteKey}_groom`,
                     frames: this.anims.generateFrameNumbers(spriteKey, {
                         start: 128,
-                        end: 135
+                        end: 131
                     }),
                     frameRate: 4,
                     repeat: 0
                 });
                 
-                // Eating
+                // Row 5 (frames 160-191): Sleeping
+                // Use frames 160-161 for sleeping (breathing animation)
                 this.anims.create({
-                    key: `${spriteKey}_eat`,
+                    key: `${spriteKey}_sleep`,
                     frames: this.anims.generateFrameNumbers(spriteKey, {
-                        start: 224,
-                        end: 231
+                        start: 160,
+                        end: 161
                     }),
-                    frameRate: 6,
+                    frameRate: 2,
                     repeat: -1
                 });
                 
-                // Jumping
+                // Row 6 (frames 192-223): Jumping
+                // Use frames 192-195 for jumping
                 this.anims.create({
                     key: `${spriteKey}_jump`,
                     frames: this.anims.generateFrameNumbers(spriteKey, {
                         start: 192,
-                        end: 199
+                        end: 195
                     }),
                     frameRate: 10,
                     repeat: 0
                 });
                 
-                // Playing
+                // Row 7 (frames 224-255): Eating
+                // Use frames 224-227 for eating
+                this.anims.create({
+                    key: `${spriteKey}_eat`,
+                    frames: this.anims.generateFrameNumbers(spriteKey, {
+                        start: 224,
+                        end: 227
+                    }),
+                    frameRate: 6,
+                    repeat: -1
+                });
+                
+                // Playing animation (use jumping frames)
                 this.anims.create({
                     key: `${spriteKey}_play`,
                     frames: this.anims.generateFrameNumbers(spriteKey, {
-                        start: 200,
-                        end: 207
+                        start: 192,
+                        end: 195
                     }),
                     frameRate: 8,
                     repeat: -1
                 });
                 
-                console.log(`Created animations for ${spriteKey}`);
+                console.log(`Created animations for ${spriteKey} with ${frameTotal} total frames`);
             }
         });
     }

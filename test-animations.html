@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cat Animation Test</title>
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3.55.2/dist/phaser.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background: #333;
+            color: white;
+            font-family: Arial, sans-serif;
+        }
+        #game-container {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        #controls {
+            text-align: center;
+        }
+        button {
+            margin: 5px;
+            padding: 10px 20px;
+            font-size: 16px;
+        }
+        #info {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <h1 style="text-align: center;">Cat Animation Test</h1>
+    <div id="game-container"></div>
+    <div id="controls">
+        <button onclick="playAnim('idle')">Idle</button>
+        <button onclick="playAnim('idle_stand')">Stand</button>
+        <button onclick="playAnim('walk')">Walk</button>
+        <button onclick="playAnim('run')">Run</button>
+        <button onclick="playAnim('sleep')">Sleep</button>
+        <button onclick="playAnim('groom')">Groom</button>
+        <button onclick="playAnim('eat')">Eat</button>
+        <button onclick="playAnim('jump')">Jump</button>
+        <button onclick="toggleFlip()">Flip</button>
+    </div>
+    <div id="info">Loading...</div>
+
+    <script>
+        let currentCat;
+        let infoText;
+
+        class TestScene extends Phaser.Scene {
+            constructor() {
+                super({ key: 'TestScene' });
+            }
+
+            preload() {
+                // Load gusty sprite sheet
+                this.load.spritesheet('cat_gusty', 'assets/sprites/gusty.png', {
+                    frameWidth: 32,
+                    frameHeight: 30
+                });
+            }
+
+            create() {
+                this.cameras.main.setBackgroundColor('#666');
+                
+                // Create animations with corrected frame ranges
+                this.anims.create({
+                    key: 'cat_gusty_idle',
+                    frames: this.anims.generateFrameNumbers('cat_gusty', { start: 0, end: 3 }),
+                    frameRate: 4,
+                    repeat: -1
+                });
+
+                this.anims.create({
+                    key: 'cat_gusty_idle_stand',
+                    frames: this.anims.generateFrameNumbers('cat_gusty', { start: 32, end: 35 }),
+                    frameRate: 4,
+                    repeat: -1
+                });
+
+                this.anims.create({
+                    key: 'cat_gusty_walk',
+                    frames: this.anims.generateFrameNumbers('cat_gusty', { start: 64, end: 67 }),
+                    frameRate: 8,
+                    repeat: -1
+                });
+
+                this.anims.create({
+                    key: 'cat_gusty_run',
+                    frames: this.anims.generateFrameNumbers('cat_gusty', { start: 96, end: 99 }),
+                    frameRate: 12,
+                    repeat: -1
+                });
+
+                this.anims.create({
+                    key: 'cat_gusty_sleep',
+                    frames: this.anims.generateFrameNumbers('cat_gusty', { start: 160, end: 161 }),
+                    frameRate: 2,
+                    repeat: -1
+                });
+
+                this.anims.create({
+                    key: 'cat_gusty_groom',
+                    frames: this.anims.generateFrameNumbers('cat_gusty', { start: 128, end: 131 }),
+                    frameRate: 4,
+                    repeat: 0
+                });
+
+                this.anims.create({
+                    key: 'cat_gusty_eat',
+                    frames: this.anims.generateFrameNumbers('cat_gusty', { start: 224, end: 227 }),
+                    frameRate: 6,
+                    repeat: -1
+                });
+
+                this.anims.create({
+                    key: 'cat_gusty_jump',
+                    frames: this.anims.generateFrameNumbers('cat_gusty', { start: 192, end: 195 }),
+                    frameRate: 10,
+                    repeat: 0
+                });
+
+                // Create cat sprite
+                currentCat = this.add.sprite(400, 300, 'cat_gusty', 2);
+                currentCat.setScale(5);
+                currentCat.play('cat_gusty_idle');
+
+                // Create info text
+                infoText = this.add.text(10, 10, '', { fontSize: '16px', color: '#fff' });
+
+                // Update loop
+                this.time.addEvent({
+                    delay: 100,
+                    callback: () => {
+                        const anim = currentCat.anims.currentAnim;
+                        const frame = currentCat.anims.currentFrame;
+                        if (anim && frame) {
+                            document.getElementById('info').innerHTML = 
+                                `Animation: ${anim.key}<br>` +
+                                `Frame: ${frame.index} / ${anim.frames.length}<br>` +
+                                `Frame Rate: ${anim.frameRate}<br>` +
+                                `Flipped: ${currentCat.flipX}`;
+                        }
+                    },
+                    loop: true
+                });
+            }
+        }
+
+        const config = {
+            type: Phaser.AUTO,
+            width: 800,
+            height: 600,
+            parent: 'game-container',
+            scene: TestScene
+        };
+
+        const game = new Phaser.Game(config);
+
+        function playAnim(animName) {
+            if (currentCat) {
+                currentCat.play('cat_gusty_' + animName);
+            }
+        }
+
+        function toggleFlip() {
+            if (currentCat) {
+                currentCat.flipX = !currentCat.flipX;
+            }
+        }
+    </script>
+</body>
+</html>

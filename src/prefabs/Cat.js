@@ -151,9 +151,9 @@ export default class Cat extends GameObjects.Container {
             return;
         }
 
-        // Create sprite from sprite sheet and set to first frame
+        // Create sprite from sprite sheet and set to a safe initial frame
         console.log(`Cat ${this.data.name}: Creating sprite from sprite sheet`);
-        this.sprite = new Phaser.GameObjects.Sprite(this.scene, 0, 0, spriteSheetKey, 0);
+        this.sprite = new Phaser.GameObjects.Sprite(this.scene, 0, 0, spriteSheetKey, 2); // Start at frame 2 instead of 0
         this.sprite.setScale(3); // Scale up more since sprites are now 32x30 instead of 64x60
         this.sprite.setOrigin(0.5, 0.7); // Adjust Y origin so feet are at position
         
@@ -183,7 +183,8 @@ export default class Cat extends GameObjects.Container {
 
         // Set initial frame and start idle animation
         if (this.sprite instanceof Phaser.GameObjects.Sprite) {
-            this.sprite.setFrame(0);
+            // Start at frame 2 to avoid potential blinking issues with frame 0
+            this.sprite.setFrame(2);
             this.playAnimation('idle');
         }
         // Images don't need frame or animation setup
@@ -206,7 +207,7 @@ export default class Cat extends GameObjects.Container {
     }
 
     playAnimation(animKey) {
-        // Skip animations for image sprites
+        // Skip animations for image sprites or fallback sprites
         if (!(this.sprite instanceof Phaser.GameObjects.Sprite)) {
             return;
         }
@@ -215,8 +216,13 @@ export default class Cat extends GameObjects.Container {
         
         if (this.sprite && this.scene.anims.exists(fullAnimKey)) {
             // Only change animation if it's different
-            if (this.sprite.anims.currentAnim?.key !== fullAnimKey) {
-                // Add transition smoothing
+            if (!this.sprite.anims.isPlaying || this.sprite.anims.currentAnim?.key !== fullAnimKey) {
+                // Stop current animation before playing new one
+                if (this.sprite.anims.isPlaying) {
+                    this.sprite.anims.stop();
+                }
+                
+                // Play the new animation
                 this.sprite.play(fullAnimKey);
                 this.currentAnimation = animKey;
                 
@@ -226,12 +232,9 @@ export default class Cat extends GameObjects.Container {
                         this.setState(CAT_STATES.IDLE);
                     });
                 }
-                
-                console.log(`Cat ${this.data.name}: Playing animation ${fullAnimKey}`);
             }
         } else {
-            console.warn(`Cat ${this.data.name}: Animation ${fullAnimKey} does not exist.`);
-            // Fallback to a static frame
+            // Fallback to a static frame if animation doesn't exist
             if (this.sprite && this.sprite.texture.key !== `fallback_cat_${this.data.id}`) {
                 this.sprite.setFrame(this.getStaticFrame());
             }
@@ -371,8 +374,11 @@ export default class Cat extends GameObjects.Container {
                 this.x += Math.cos(angle) * speed;
                 this.y += Math.sin(angle) * speed;
 
-                // Face direction
-                this.sprite.setFlipX(Math.cos(angle) < 0);
+                // Face direction - flip sprite horizontally when moving left
+                if (this.sprite) {
+                    const movingLeft = Math.cos(angle) < 0;
+                    this.sprite.setFlipX(movingLeft);
+                }
 
                 this.setState(CAT_STATES.WALKING);
 
@@ -611,6 +617,10 @@ export default class Cat extends GameObjects.Container {
         // Use proper animations with the new sprite sheets
         const animName = this.getAnimationName();
         if (animName !== this.currentAnimation) {
+            // Debug: Log animation changes
+            if (this.currentState === CAT_STATES.WALKING) {
+                console.log(`Cat ${this.data.name}: Animation change from ${this.currentAnimation} to ${animName}`);
+            }
             this.playAnimation(animName);
         }
     }
@@ -640,10 +650,9 @@ export default class Cat extends GameObjects.Container {
                 return 'idle_stand';
                 
             case CAT_STATES.WALKING:
-                // Use run animation if moving fast
-                const speed = Math.abs(this.body?.velocity?.x || 0) + Math.abs(this.body?.velocity?.y || 0);
-                this.isRunning = speed > 100;
-                return this.isRunning ? 'run' : 'walk';
+                // Always use walk animation when in walking state
+                // Don't check velocity as cats don't have physics bodies in this game
+                return 'walk';
                 
             case CAT_STATES.SLEEPING:
                 return 'sleep';
