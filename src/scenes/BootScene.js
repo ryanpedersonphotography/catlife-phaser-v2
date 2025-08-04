@@ -11,9 +11,11 @@ export default class BootScene extends Scene {
     }
 
     create() {
+        console.log('BootScene: create() called');
         // Set up any global game settings
         this.setupGlobalSettings();
         
+        console.log('BootScene: Moving to PreloadScene');
         // Move to preload scene
         this.scene.start('PreloadScene');
     }

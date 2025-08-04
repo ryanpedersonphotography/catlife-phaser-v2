@@ -58,7 +58,10 @@ const config = {
 
 // Create game instance
 window.addEventListener('load', () => {
+    console.log('DOM loaded, creating Phaser game');
+    console.log('Game config:', config);
     const game = new Phaser.Game(config);
+    console.log('Phaser game created:', game);
     
     // Handle focus/blur for pausing
     window.addEventListener('blur', () => {

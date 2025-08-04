@@ -8,8 +8,10 @@ export default class MainMenuScene extends Scene {
     }
 
     create() {
+        console.log('MainMenuScene: create() called');
         // Background gradient
         this.createBackground();
+        console.log('MainMenuScene: Background created');
         
         // Title
         this.createTitle();
