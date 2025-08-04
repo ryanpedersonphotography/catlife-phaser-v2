@@ -35,6 +35,12 @@ export default class Cat extends GameObjects.Container {
         this.medicationNeeded = false;
         this.morningRoutineComplete = false;
 
+        // Animation variety
+        this.currentAnimation = null;
+        this.lastIdleTime = 0;
+        this.isRunning = false;
+        this.animationVariety = 0;
+
         // Create sprite
         this.createSprite();
 
@@ -143,6 +149,7 @@ export default class Cat extends GameObjects.Container {
         console.log(`Cat ${this.data.name}: Creating sprite from sprite sheet`);
         this.sprite = new Phaser.GameObjects.Sprite(this.scene, 0, 0, spriteSheetKey, 0);
         this.sprite.setScale(3); // Scale up more since sprites are now 32x30 instead of 64x60
+        this.sprite.setOrigin(0.5, 0.7); // Adjust Y origin so feet are at position
         
         // Debug: Check sprite texture
         console.log(`Cat ${this.data.name}: Sprite texture info:`, {
@@ -199,10 +206,23 @@ export default class Cat extends GameObjects.Container {
         }
         
         const fullAnimKey = `${this.spriteSheetKey}_${animKey}`;
+        
         if (this.sprite && this.scene.anims.exists(fullAnimKey)) {
-            console.log(`Cat ${this.data.name}: Playing animation ${fullAnimKey}`);
-            this.sprite.play(fullAnimKey);
-            this.currentAnimation = animKey;
+            // Only change animation if it's different
+            if (this.sprite.anims.currentAnim?.key !== fullAnimKey) {
+                // Add transition smoothing
+                this.sprite.play(fullAnimKey);
+                this.currentAnimation = animKey;
+                
+                // Special handling for one-time animations
+                if (['jump', 'groom'].includes(animKey)) {
+                    this.sprite.once('animationcomplete', () => {
+                        this.setState(CAT_STATES.IDLE);
+                    });
+                }
+                
+                console.log(`Cat ${this.data.name}: Playing animation ${fullAnimKey}`);
+            }
         } else {
             console.warn(`Cat ${this.data.name}: Animation ${fullAnimKey} does not exist.`);
             // Fallback to a static frame
@@ -318,6 +338,14 @@ export default class Cat extends GameObjects.Container {
             this.wander();
         } else if (Math.random() < 0.2) {
             this.seekPlay();
+        } else if (Math.random() < 0.1 && this.currentState === CAT_STATES.IDLE) {
+            this.groom();
+        } else if (Math.random() < 0.15 && this.currentState === CAT_STATES.IDLE) {
+            // Sometimes switch to standing idle
+            this.setState(CAT_STATES.IDLE_STAND);
+            this.scene.time.delayedCall(Phaser.Math.Between(3000, 6000), () => {
+                this.setState(CAT_STATES.IDLE);
+            });
         }
     }
 
@@ -479,19 +507,26 @@ export default class Cat extends GameObjects.Container {
     }
 
     play() {
-        this.setState(CAT_STATES.PLAYING);
+        if (Math.random() > 0.7) {
+            // Jump play
+            this.playAnimation('jump');
+            this.scene.time.delayedCall(800, () => {
+                this.setState(CAT_STATES.PLAYING);
+            });
+        } else {
+            this.setState(CAT_STATES.PLAYING);
+        }
+        
         this.stats.happiness += 15;
         this.stats.energy -= 10;
+    }
 
-        // Play animation
-        this.scene.tweens.add({
-            targets: this.sprite,
-            rotation: Math.PI * 2,
-            duration: 1000,
-            onComplete: () => {
-                this.sprite.rotation = 0;
-                this.setState(CAT_STATES.IDLE);
-            }
+    groom() {
+        this.setState(CAT_STATES.USING_LITTER);
+        this.stats.cleanliness = Math.min(100, this.stats.cleanliness + 20);
+        
+        this.scene.time.delayedCall(2000, () => {
+            this.setState(CAT_STATES.IDLE);
         });
     }
 
@@ -511,17 +546,53 @@ export default class Cat extends GameObjects.Container {
     }
 
     getAnimationName() {
+        const currentTime = this.scene.time.now;
+        
         switch(this.currentState) {
             case CAT_STATES.IDLE:
-                return 'idle';
+                // Personality modifiers
+                if (this.data.id === 'tink' && this.currentState === CAT_STATES.IDLE) {
+                    // Tink is more active, less sitting
+                    return 'idle_stand';
+                } else if (this.data.id === 'stinkylee' && this.currentState === CAT_STATES.IDLE) {
+                    // Stinky Lee is aloof, more sitting
+                    return 'idle';
+                }
+                
+                // Alternate between sitting and standing idle for other cats
+                if (currentTime - this.lastIdleTime > 5000) {
+                    this.animationVariety = (this.animationVariety + 1) % 2;
+                    this.lastIdleTime = currentTime;
+                }
+                return this.animationVariety === 0 ? 'idle' : 'idle_stand';
+                
+            case CAT_STATES.IDLE_STAND:
+                return 'idle_stand';
+                
             case CAT_STATES.WALKING:
-                return 'walk';
+                // Use run animation if moving fast
+                const speed = Math.abs(this.body?.velocity?.x || 0) + Math.abs(this.body?.velocity?.y || 0);
+                this.isRunning = speed > 100;
+                return this.isRunning ? 'run' : 'walk';
+                
             case CAT_STATES.SLEEPING:
                 return 'sleep';
+                
             case CAT_STATES.EATING:
-                return 'idle'; // Use idle animation for eating
+                return 'eat';
+                
             case CAT_STATES.PLAYING:
-                return 'walk'; // Use walk animation for playing
+                return 'play';
+                
+            case CAT_STATES.USING_LITTER:
+                return 'groom';
+                
+            case CAT_STATES.GROOMING:
+                return 'groom';
+                
+            case CAT_STATES.RUNNING:
+                return 'run';
+                
             default:
                 return 'idle';
         }

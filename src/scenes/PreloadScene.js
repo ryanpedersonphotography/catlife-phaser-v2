@@ -414,84 +414,110 @@ export default class PreloadScene extends Scene {
     createAnimations() {
         console.log('Creating animations for cat sprite sheets...');
         
-        // Create animations for each cat's sprite sheet
         const catNames = ['gusty', 'snicker', 'rudy', 'scampi', 'stinkylee', 'jonah', 'tink', 'lucy', 'giselle'];
         
         catNames.forEach(catName => {
             const spriteKey = `cat_${catName}`;
             
             if (this.textures.exists(spriteKey)) {
-                const texture = this.textures.get(spriteKey);
-                const frameCount = texture.frameTotal;
-                console.log(`Creating animations for ${spriteKey} with ${frameCount} frames`);
-                // Based on the sprite sheet layout (32 frames per row at 32x30):
-                // With 1024x480 image and 32x30 frames = 32 columns x 16 rows = 512 frames total
-                // Each animation type is on different rows
+                // Idle sitting (skip first 2 frames to avoid blinking)
+                this.anims.create({
+                    key: `${spriteKey}_idle`,
+                    frames: this.anims.generateFrameNumbers(spriteKey, {
+                        start: 2,
+                        end: 7
+                    }),
+                    frameRate: 3,
+                    repeat: -1
+                });
                 
-                // Ensure frame ranges don't exceed available frames
-                const safeFrameEnd = (endFrame) => Math.min(endFrame, frameCount - 1);
+                // Idle standing
+                this.anims.create({
+                    key: `${spriteKey}_idle_stand`,
+                    frames: this.anims.generateFrameNumbers(spriteKey, {
+                        start: 34,
+                        end: 39
+                    }),
+                    frameRate: 3,
+                    repeat: -1
+                });
                 
-                // Idle/Sitting animation - use first row, skip blinking frames
-                if (frameCount > 0) {
-                    this.anims.create({
-                        key: `${spriteKey}_idle`,
-                        frames: this.anims.generateFrameNumbers(spriteKey, {
-                            start: 1,  // Skip frame 0 which might be blinking
-                            end: safeFrameEnd(15)
-                        }),
-                        frameRate: 4,
-                        repeat: -1
-                    });
-                }
+                // Walking
+                this.anims.create({
+                    key: `${spriteKey}_walk`,
+                    frames: this.anims.generateFrameNumbers(spriteKey, {
+                        start: 64,
+                        end: 71
+                    }),
+                    frameRate: 8,
+                    repeat: -1
+                });
                 
-                // Walking animation - use a different row for walking frames
-                // Row 3 or 4 (frames 64-95 or 96-127) typically have walking animations
-                if (frameCount > 96) {
-                    this.anims.create({
-                        key: `${spriteKey}_walk`,
-                        frames: this.anims.generateFrameNumbers(spriteKey, {
-                            start: 96,  // Start from row 4 (96 = 32 * 3)
-                            end: safeFrameEnd(111)  // Use frames from walking row
-                        }),
-                        frameRate: 8,
-                        repeat: -1
-                    });
-                } else {
-                    // Fallback - use frames that don't include blinking
-                    this.anims.create({
-                        key: `${spriteKey}_walk`,
-                        frames: this.anims.generateFrameNumbers(spriteKey, {
-                            start: 2,  // Skip early frames that might blink
-                            end: safeFrameEnd(15)
-                        }),
-                        frameRate: 6,
-                        repeat: -1
-                    });
-                }
+                // Running
+                this.anims.create({
+                    key: `${spriteKey}_run`,
+                    frames: this.anims.generateFrameNumbers(spriteKey, {
+                        start: 96,
+                        end: 103
+                    }),
+                    frameRate: 12,
+                    repeat: -1
+                });
                 
-                // Sleeping/Laying animation - use laying down frames (if available)
-                if (frameCount > 32) {
-                    this.anims.create({
-                        key: `${spriteKey}_sleep`,
-                        frames: this.anims.generateFrameNumbers(spriteKey, {
-                            start: 32,
-                            end: safeFrameEnd(35)
-                        }),
-                        frameRate: 2,
-                        repeat: -1
-                    });
-                } else {
-                    // Fallback to idle frames for sleeping
-                    this.anims.create({
-                        key: `${spriteKey}_sleep`,
-                        frames: this.anims.generateFrameNumbers(spriteKey, {
-                            start: 0,
-                            end: safeFrameEnd(1)
-                        }),
-                        frameRate: 1,
-                        repeat: -1
-                    });
-                }
+                // Sleeping (gentle breathing loop)
+                this.anims.create({
+                    key: `${spriteKey}_sleep`,
+                    frames: this.anims.generateFrameNumbers(spriteKey, {
+                        start: 160,
+                        end: 163
+                    }),
+                    frameRate: 2,
+                    repeat: -1
+                });
+                
+                // Grooming
+                this.anims.create({
+                    key: `${spriteKey}_groom`,
+                    frames: this.anims.generateFrameNumbers(spriteKey, {
+                        start: 128,
+                        end: 135
+                    }),
+                    frameRate: 4,
+                    repeat: 0
+                });
+                
+                // Eating
+                this.anims.create({
+                    key: `${spriteKey}_eat`,
+                    frames: this.anims.generateFrameNumbers(spriteKey, {
+                        start: 224,
+                        end: 231
+                    }),
+                    frameRate: 6,
+                    repeat: -1
+                });
+                
+                // Jumping
+                this.anims.create({
+                    key: `${spriteKey}_jump`,
+                    frames: this.anims.generateFrameNumbers(spriteKey, {
+                        start: 192,
+                        end: 199
+                    }),
+                    frameRate: 10,
+                    repeat: 0
+                });
+                
+                // Playing
+                this.anims.create({
+                    key: `${spriteKey}_play`,
+                    frames: this.anims.generateFrameNumbers(spriteKey, {
+                        start: 200,
+                        end: 207
+                    }),
+                    frameRate: 8,
+                    repeat: -1
+                });
                 
                 console.log(`Created animations for ${spriteKey}`);
             }

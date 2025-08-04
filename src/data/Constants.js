@@ -51,6 +51,7 @@ export const ROOM_TYPES = {
 
 export const CAT_STATES = {
     IDLE: 'idle',
+    IDLE_STAND: 'idle_stand',
     WALKING: 'walking',
     EATING: 'eating',
     SLEEPING: 'sleeping',
@@ -58,7 +59,9 @@ export const CAT_STATES = {
     USING_LITTER: 'usingLitter',
     SEEKING_ATTENTION: 'seekingAttention',
     STRESSED: 'stressed',
-    SICK: 'sick'
+    SICK: 'sick',
+    GROOMING: 'grooming',
+    RUNNING: 'running'
 };
 
 export const NEED_TYPES = {
