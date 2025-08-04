@@ -126,7 +126,8 @@ export default class Cat extends GameObjects.Container {
         this.createStatusIndicators();
 
         // Set initial frame and start idle animation
-        this.sprite.setFrame(0);
+        // Idle animation begins at frame 16 of the sprite sheet
+        this.sprite.setFrame(16);
         this.playAnimation('idle');
 
         // Ensure sprite is visible
@@ -475,17 +476,17 @@ export default class Cat extends GameObjects.Container {
     getStaticFrame() {
         switch(this.currentState) {
             case CAT_STATES.IDLE:
-                return 0;
+                return 16; // Start of "looking around" row
             case CAT_STATES.WALKING:
-                return 2;
+                return 48; // First walking frame
             case CAT_STATES.SLEEPING:
-                return 6;
+                return 32; // First laying down frame
             case CAT_STATES.EATING:
-                return 1;
+                return 16;
             case CAT_STATES.PLAYING:
-                return 3;
+                return 48;
             default:
-                return 0;
+                return 16;
         }
     }
 

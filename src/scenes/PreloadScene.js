@@ -418,14 +418,14 @@ export default class PreloadScene extends Scene {
                 // Row 7 (frames 96-111): Side walk
                 // Row 8 (frames 112-127): Sitting 2.0
                 
-                // Idle/Sitting animation - use first few frames of sitting
+                // Idle animation - use "looking around" row for a gentle loop
                 this.anims.create({
                     key: `${spriteKey}_idle`,
                     frames: this.anims.generateFrameNumbers(spriteKey, {
-                        start: 0,
-                        end: 3
+                        start: 16,
+                        end: 23
                     }),
-                    frameRate: 4,
+                    frameRate: 6,
                     repeat: -1
                 });
                 
