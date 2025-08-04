@@ -41,7 +41,9 @@ export const TIME_CONFIG = {
 
 export const ROOM_TYPES = {
     KITCHEN: 'kitchen',
+    DINING_ROOM: 'diningRoom',
     LIVING_ROOM: 'livingRoom',
+    HALLWAY: 'hallway',
     BEDROOM: 'bedroom',
     BATHROOM: 'bathroom',
     OUTSIDE: 'outside'

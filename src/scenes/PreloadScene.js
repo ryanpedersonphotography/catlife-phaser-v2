@@ -85,9 +85,15 @@ export default class PreloadScene extends Scene {
         // Create animations
         this.createAnimations();
         
-        console.log('PreloadScene: Starting MainMenuScene');
-        // Move to main menu
-        this.scene.start('MainMenuScene');
+        // TODO: Restore menu when game is fully working
+        // console.log('PreloadScene: Starting MainMenuScene');
+        // this.scene.start('MainMenuScene');
+        
+        // TEMPORARY: Skip menu and start game directly in easy mode for troubleshooting
+        console.log('PreloadScene: Skipping menu, starting GameScene in easy mode');
+        this.registry.set('difficulty', 'easy');
+        this.registry.set('difficultyMultiplier', 0.5);
+        this.scene.start('GameScene', { newGame: true });
     }
 
     loadRealAssets() { 
@@ -97,30 +103,28 @@ export default class PreloadScene extends Scene {
         this.load.setPath('assets/sprites/');
         console.log('Base path set to:', this.load.path);
         
-        // Map of cat colors to sprite sheet files
+        // Map of cat names to their sprite sheet files
         const catSpriteSheets = {
-            'orange': 'orange_0.png',
-            'black': 'black_0.png',
-            'gray': 'grey_0.png',
-            'brown': 'brown_0.png',
-            'pink': 'pink_0.png',
-            'blue': 'blue_0.png',
-            'green': 'teal_0.png',  // Using teal as green
-            'yellow': 'yellow_0.png',
-            'white': 'white_0.png',
-            'calico': 'calico_0.png',
-            'red': 'red_0.png'
+            'gusty': 'gusty.png',
+            'snicker': 'snicker.png',
+            'rudy': 'rudy.png',
+            'scampi': 'scampi.png',
+            'stinkylee': 'stinkylee.png',
+            'jonah': 'jonah.png',
+            'tink': 'tink.png',
+            'lucy': 'lucy.png',
+            'giselle': 'giselle.png'
         };
         
-        // Load cat sprite sheets
-        Object.entries(catSpriteSheets).forEach(([color, filename]) => {
-            const key = `cat_${color}`;
-            console.log(`Loading sprite sheet: ${key} from ${filename}`);
+        // Load sprite sheets with proper frame dimensions for animations
+        // Each cat is 32x30 pixels, not 64x60!
+        Object.entries(catSpriteSheets).forEach(([catName, filename]) => {
+            const key = `cat_${catName}`;
+            console.log(`Loading sprite sheet: ${key} from ${filename} with frames 32x30`);
             
-            // Each sprite sheet has 64x60 pixel sprites in a grid (480px / 8 rows = 60px per row)
             this.load.spritesheet(key, filename, {
-                frameWidth: 64,
-                frameHeight: 60,
+                frameWidth: 32,
+                frameHeight: 30,
                 margin: 0,
                 spacing: 0
             });
@@ -410,60 +414,55 @@ export default class PreloadScene extends Scene {
     createAnimations() {
         console.log('Creating animations for cat sprite sheets...');
         
-        // Create animations for each loaded sprite sheet
-        const catColors = ['orange', 'black', 'gray', 'brown', 'pink', 'blue', 'green', 'yellow', 'white', 'calico', 'red'];
+        // Create animations for each cat's sprite sheet
+        const catNames = ['gusty', 'snicker', 'rudy', 'scampi', 'stinkylee', 'jonah', 'tink', 'lucy', 'giselle'];
         
-        catColors.forEach(color => {
-            const spriteKey = `cat_${color}`;
+        catNames.forEach(catName => {
+            const spriteKey = `cat_${catName}`;
             
             if (this.textures.exists(spriteKey)) {
                 const texture = this.textures.get(spriteKey);
                 const frameCount = texture.frameTotal;
                 console.log(`Creating animations for ${spriteKey} with ${frameCount} frames`);
-                // Based on the sprite sheet layout (16 frames per row at 64x60):
-                // Row 1 (frames 0-15): Sitting down
-                // Row 2 (frames 16-31): Looking around  
-                // Row 3 (frames 32-47): Laying down
-                // Row 4 (frames 48-63): Walking
-                // Row 5 (frames 64-79): Running
-                // Row 6 (frames 80-95): Running 2.0
-                // Row 7 (frames 96-111): Side walk
-                // Row 8 (frames 112-127): Sitting 2.0
+                // Based on the sprite sheet layout (32 frames per row at 32x30):
+                // With 1024x480 image and 32x30 frames = 32 columns x 16 rows = 512 frames total
+                // Each animation type is on different rows
                 
                 // Ensure frame ranges don't exceed available frames
                 const safeFrameEnd = (endFrame) => Math.min(endFrame, frameCount - 1);
                 
-                // Idle/Sitting animation - use first few frames of sitting
+                // Idle/Sitting animation - use first row, skip blinking frames
                 if (frameCount > 0) {
                     this.anims.create({
                         key: `${spriteKey}_idle`,
                         frames: this.anims.generateFrameNumbers(spriteKey, {
-                            start: 0,
-                            end: safeFrameEnd(3)
+                            start: 1,  // Skip frame 0 which might be blinking
+                            end: safeFrameEnd(15)
                         }),
                         frameRate: 4,
                         repeat: -1
                     });
                 }
                 
-                // Walking animation - use walking frames (if we have enough frames)
-                if (frameCount > 48) {
+                // Walking animation - use a different row for walking frames
+                // Row 3 or 4 (frames 64-95 or 96-127) typically have walking animations
+                if (frameCount > 96) {
                     this.anims.create({
                         key: `${spriteKey}_walk`,
                         frames: this.anims.generateFrameNumbers(spriteKey, {
-                            start: 48,
-                            end: safeFrameEnd(55)
+                            start: 96,  // Start from row 4 (96 = 32 * 3)
+                            end: safeFrameEnd(111)  // Use frames from walking row
                         }),
                         frameRate: 8,
                         repeat: -1
                     });
                 } else {
-                    // Fallback to idle frames for walking
+                    // Fallback - use frames that don't include blinking
                     this.anims.create({
                         key: `${spriteKey}_walk`,
                         frames: this.anims.generateFrameNumbers(spriteKey, {
-                            start: 0,
-                            end: safeFrameEnd(3)
+                            start: 2,  // Skip early frames that might blink
+                            end: safeFrameEnd(15)
                         }),
                         frameRate: 6,
                         repeat: -1

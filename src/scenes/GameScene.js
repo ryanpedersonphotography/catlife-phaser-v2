@@ -123,7 +123,9 @@ export default class GameScene extends Scene {
         this.cats = [];
         const allCats = getAllCats();
         
+        // Create all cats with their unique sprites
         allCats.forEach(catData => {
+            console.log(`Creating cat: ${catData.name}`);
             const cat = new Cat(this, catData);
             this.cats.push(cat);
             
@@ -185,12 +187,16 @@ export default class GameScene extends Scene {
         // Double tap for quick actions
         let lastTapTime = 0;
         this.input.on('pointerdown', (pointer) => {
-            const currentTime = this.time.now;
-            if (currentTime - lastTapTime < 300) {
-                // Double tap detected
-                this.handleDoubleTap(pointer);
+            // Only handle double tap if we're not clicking on an interactive object
+            const hitTest = this.input.hitTestPointer(pointer);
+            if (hitTest.length === 0) {
+                const currentTime = this.time.now;
+                if (currentTime - lastTapTime < 300) {
+                    // Double tap detected
+                    this.handleDoubleTap(pointer);
+                }
+                lastTapTime = currentTime;
             }
-            lastTapTime = currentTime;
         });
         
         // Pinch to zoom (disabled for now but framework in place)
@@ -265,8 +271,13 @@ export default class GameScene extends Scene {
     }
 
     handleCatClick(cat) {
-        // Show cat info panel
-        this.events.emit('show-cat-info', cat.data);
+        console.log('GameScene.handleCatClick called with cat:', cat);
+        console.log('Cat data:', cat.data);
+        console.log('Cat stats:', cat.stats);
+        
+        // Show cat info panel - pass the entire cat instance, not just data
+        this.events.emit('show-cat-info', cat);
+        console.log('Emitted show-cat-info event');
     }
 
     showNotification(text) {

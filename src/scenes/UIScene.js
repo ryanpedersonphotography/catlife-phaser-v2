@@ -15,8 +15,10 @@ export default class UIScene extends Scene {
         this.createCatInfoPanel();
         
         // Listen to events from game scene
+        console.log('UIScene: Setting up event listeners');
         gameScene.events.on('show-cat-info', this.showCatInfo, this);
         gameScene.events.on('update-ui', this.updateUI, this);
+        console.log('UIScene: Event listeners set up');
         
         // Update UI every frame
         this.time.addEvent({
@@ -271,77 +273,97 @@ export default class UIScene extends Scene {
     }
 
     createCatInfoPanel() {
-        // Hidden by default
-        this.catInfoPanel = this.add.container(GAME_WIDTH - 300, 200);
+        // Create container at (0,0) first
+        this.catInfoPanel = this.add.container(0, 0);
         this.catInfoPanel.setVisible(false);
-        this.catInfoPanel.setDepth(DEPTHS.UI_ELEMENTS);
+        this.catInfoPanel.setDepth(DEPTHS.MODALS);
+        this.catInfoPanel.setScrollFactor(0); // Ensure panel doesn't scroll with camera
         
         // Panel background
-        const panelBg = this.add.image(0, 0, 'ui_panel');
-        this.catInfoPanel.add(panelBg);
+        const panelGraphics = this.add.graphics();
+        panelGraphics.fillStyle(COLORS.DARK, 0.95);
+        panelGraphics.fillRoundedRect(-250, -280, 500, 560, 20);
+        panelGraphics.lineStyle(3, COLORS.PRIMARY, 1);
+        panelGraphics.strokeRoundedRect(-250, -280, 500, 560, 20);
+        this.catInfoPanel.add(panelGraphics);
         
         // Cat sprite
-        this.catInfoSprite = this.add.sprite(0, -120, 'cat_gusty');
+        this.catInfoSprite = this.add.sprite(0, -180, 'cat_gusty');
+        this.catInfoSprite.setScale(3); // Scale up the sprite in the info panel
         this.catInfoPanel.add(this.catInfoSprite);
         
         // Cat name
-        this.catInfoName = this.add.text(0, -60, '', {
-            fontSize: '24px',
+        this.catInfoName = this.add.text(0, -100, '', {
+            fontSize: '28px',
             fontStyle: 'bold',
             color: '#ffffff'
         }).setOrigin(0.5);
         this.catInfoPanel.add(this.catInfoName);
         
-        // Stats
-        this.catInfoStats = this.add.text(0, 0, '', {
+        // Stats - with word wrap to stay within panel
+        this.catInfoStats = this.add.text(-230, -20, '', {
             fontSize: '16px',
             color: '#ffffff',
             align: 'left',
-            lineSpacing: 5
-        }).setOrigin(0.5);
+            lineSpacing: 8,
+            wordWrap: { width: 450, useAdvancedWrap: true }
+        }).setOrigin(0, 0);
         this.catInfoPanel.add(this.catInfoStats);
         
-        // Close button
-        const closeBtn = this.add.text(120, -160, 'X', {
-            fontSize: '24px'
+        // Close button - position in top right of panel
+        const closeBtn = this.add.text(220, -260, 'X', {
+            fontSize: '28px',
+            color: '#ffffff',
+            fontStyle: 'bold'
         }).setOrigin(0.5)
           .setInteractive({ useHandCursor: true });
         
         closeBtn.on('pointerdown', () => {
             this.catInfoPanel.setVisible(false);
+            if (this.overlay) {
+                this.overlay.setVisible(false);
+            }
         });
         
         this.catInfoPanel.add(closeBtn);
+        
+        // NOW position the container at center
+        this.catInfoPanel.x = GAME_WIDTH / 2;
+        this.catInfoPanel.y = GAME_HEIGHT / 2;
     }
 
-    showCatInfo(catData) {
-        this.catInfoPanel.setVisible(true);
-        // Use color-based texture instead of per-cat texture
-        const colorMap = {
-            '#FF6B6B': 'pink',
-            '#FF9F1C': 'orange',
-            '#9B59B6': 'pink',
-            '#F39C12': 'orange',
-            '#7F8C8D': 'gray',
-            '#E74C3C': 'orange',
-            '#2C3E50': 'gray',
-            '#000000': 'black',
-            '#ECF0F1': 'gray',
-            '#34495E': 'gray',
-            '#8B4513': 'brown',
-            '#5D6D7E': 'gray',
-            '#D35400': 'orange',
-            '#F8BBD0': 'pink',
-            '#FFAB00': 'orange',
-            '#FDD835': 'yellow',
-            '#43A047': 'green',
-            '#E91E63': 'pink',
-            '#FF5722': 'orange',
-            '#FDD835': 'yellow'
-        };
-        const spriteColor = colorMap[catData.color] || 'gray';
-        const spriteSheetKey = `cat_${spriteColor}`;
-        this.catInfoSprite.setTexture(spriteSheetKey, 0);
+    showCatInfo(cat) {
+        console.log('showCatInfo called with cat:', cat);
+        
+        // Create dark overlay if it doesn't exist
+        if (!this.overlay) {
+            this.overlay = this.add.graphics();
+            this.overlay.fillStyle(0x000000, 0.5);
+            this.overlay.fillRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
+            this.overlay.setDepth(DEPTHS.MODALS - 1);
+            this.overlay.setScrollFactor(0); // Ensure overlay doesn't scroll
+            this.overlay.setInteractive();
+            this.overlay.on('pointerdown', () => {
+                this.catInfoPanel.setVisible(false);
+                this.overlay.setVisible(false);
+            });
+        }
+        
+        this.overlay.setVisible(true);
+        
+        // Get the cat's data and stats
+        const catData = cat.data;
+        const catStats = cat.stats;
+        
+        console.log('showCatInfo - cat:', cat);
+        console.log('showCatInfo - catData:', catData);
+        console.log('showCatInfo - catStats:', catStats);
+        
+        // Use the cat's actual sprite key
+        const catName = catData.name.toLowerCase().replace(/\s+/g, '');
+        const spriteSheetKey = `cat_${catName}`;
+        this.catInfoSprite.setTexture(spriteSheetKey, 1); // Use frame 1 instead of 0 to avoid blinking
+        this.catInfoSprite.setScale(3); // Scale up more for better visibility
         this.catInfoName.setText(catData.name);
         
         const conditionText = catData.specialNeeds && catData.specialNeeds.condition 
@@ -351,22 +373,23 @@ export default class UIScene extends Scene {
         const stats = [
             `Age: ${catData.age} years`,
             `Condition: ${conditionText}`,
-            `Happiness: ${Math.round(catData.happiness || 50)}%`,
-            `Hunger: ${Math.round(catData.hunger || 50)}%`,
-            `Energy: ${Math.round(catData.energy || 50)}%`,
+            `Happiness: ${Math.round(catStats.happiness || 50)}%`,
+            `Hunger: ${Math.round(catStats.hunger || 50)}%`,
+            `Energy: ${Math.round(catStats.energy || 100)}%`,
             '',
             catData.backstory
         ].join('\n');
         
         this.catInfoStats.setText(stats);
         
-        // Animate panel
-        this.tweens.add({
-            targets: this.catInfoPanel,
-            x: GAME_WIDTH - 170,
-            duration: 300,
-            ease: 'Back.out'
-        });
+        // Force panel to center position
+        // Reset to absolute center regardless of camera
+        this.catInfoPanel.x = GAME_WIDTH / 2;
+        this.catInfoPanel.y = GAME_HEIGHT / 2;
+        
+        // Make panel visible after positioning
+        this.catInfoPanel.setVisible(true);
+        
     }
 
     updateUI() {

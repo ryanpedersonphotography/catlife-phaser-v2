@@ -65,7 +65,12 @@ export default class Cat extends GameObjects.Container {
         
         // Also make the container clickable
         this.on('pointerdown', () => {
-            this.scene.handleCatClick(this);
+            console.log(`Cat ${this.data.name} clicked!`);
+            if (this.scene.handleCatClick) {
+                this.scene.handleCatClick(this);
+            } else {
+                console.error('handleCatClick not found on scene');
+            }
         });
 
         // AI will start in update loop
@@ -119,38 +124,25 @@ export default class Cat extends GameObjects.Container {
             this.sprite.destroy();
         }
         
-        // Define color mapping for original 9 cats
-        const colorMap = {
-            '#FF9F1C': 'orange',    // Gusty - orange
-            '#8B4513': 'brown',     // Snicker - brown
-            '#E74C3C': 'red',       // Rudy - red
-            '#FDD835': 'yellow',    // Scampi - yellow
-            '#4A148C': 'pink',      // Stinky Lee - indigo (use pink for now)
-            '#2196F3': 'blue',      // Jonah - blue
-            '#E91E63': 'pink',      // Tink - pink
-            '#424242': 'gray',      // Lucy - dark gray
-            '#F5F5DC': 'white'      // Giselle - creme (use white)
-        };
+        // Use cat name directly for sprite key since each cat has their own sprite
+        const catName = this.data.name.toLowerCase().replace(/\s+/g, '');
+        const spriteSheetKey = `cat_${catName}`;
 
-        // Get the sprite color
-        const spriteColor = colorMap[this.data.color] || 'gray';
-        const spriteSheetKey = `cat_${spriteColor}`;
-
-        console.log(`Cat ${this.data.name}: Creating sprite with texture ${spriteSheetKey} (color: ${this.data.color})`);
+        console.log(`Cat ${this.data.name}: Creating sprite with unique texture ${spriteSheetKey}`);
 
         // Verify texture exists before creating sprite
         if (!this.scene.textures.exists(spriteSheetKey)) {
             console.error(`Cat ${this.data.name}: Texture ${spriteSheetKey} does not exist!`);
             console.log('Available textures:', Object.keys(this.scene.textures.list));
             // Use a fallback texture or create a simple colored rectangle
-            this.createFallbackSprite(spriteColor);
+            this.createFallbackSprite(this.data.color);
             return;
         }
 
-        // Main sprite using sprite sheet - specify frame 0 initially
-        // IMPORTANT: Do NOT add the sprite to the scene directly, only to the container
+        // Create sprite from sprite sheet and set to first frame
+        console.log(`Cat ${this.data.name}: Creating sprite from sprite sheet`);
         this.sprite = new Phaser.GameObjects.Sprite(this.scene, 0, 0, spriteSheetKey, 0);
-        this.sprite.setScale(1.5); // Scale up for better visibility
+        this.sprite.setScale(3); // Scale up more since sprites are now 32x30 instead of 64x60
         
         // Debug: Check sprite texture
         console.log(`Cat ${this.data.name}: Sprite texture info:`, {
@@ -170,19 +162,22 @@ export default class Cat extends GameObjects.Container {
         // Debug: Check children after adding sprite
         console.log(`Cat ${this.data.name}: Container children after add:`, this.list.length);
 
+        // Store sprite sheet key for animations BEFORE using it
+        this.spriteSheetKey = spriteSheetKey;
+
         // Create name label and status indicators
         this.createNameLabelAndStatus();
 
         // Set initial frame and start idle animation
-        this.sprite.setFrame(0);
-        this.playAnimation('idle');
+        if (this.sprite instanceof Phaser.GameObjects.Sprite) {
+            this.sprite.setFrame(0);
+            this.playAnimation('idle');
+        }
+        // Images don't need frame or animation setup
 
         // Ensure sprite is visible
         this.sprite.setVisible(true);
         this.sprite.setAlpha(1);
-
-        // Store sprite sheet key for animations
-        this.spriteSheetKey = spriteSheetKey;
 
         // Debug visibility
         console.log(`Cat ${this.data.name} sprite:`, {
@@ -198,6 +193,11 @@ export default class Cat extends GameObjects.Container {
     }
 
     playAnimation(animKey) {
+        // Skip animations for image sprites
+        if (!(this.sprite instanceof Phaser.GameObjects.Sprite)) {
+            return;
+        }
+        
         const fullAnimKey = `${this.spriteSheetKey}_${animKey}`;
         if (this.sprite && this.scene.anims.exists(fullAnimKey)) {
             console.log(`Cat ${this.data.name}: Playing animation ${fullAnimKey}`);
