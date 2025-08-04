@@ -13,8 +13,7 @@ export default class FoodBowl extends GameObjects.Container {
         // Create visuals
         this.createBowl();
         
-        // Add to scene
-        scene.add.existing(this);
+        // Container is automatically added to scene when created, no need to add again
         this.setDepth(DEPTHS.OBJECTS);
         
         // Make interactive
@@ -23,12 +22,12 @@ export default class FoodBowl extends GameObjects.Container {
     }
     
     createBowl() {
-        // Bowl sprite
-        this.bowlSprite = this.scene.add.image(0, 0, 'food_bowl_empty');
+        // Bowl sprite - create without adding to scene
+        this.bowlSprite = new Phaser.GameObjects.Image(this.scene, 0, 0, 'food_bowl_empty');
         this.add(this.bowlSprite);
         
-        // Amount indicator
-        this.amountText = this.scene.add.text(0, -35, '0%', {
+        // Amount indicator - create without adding to scene
+        this.amountText = new Phaser.GameObjects.Text(this.scene, 0, -35, '0%', {
             fontSize: '14px',
             fontStyle: 'bold',
             color: '#ffffff',
@@ -37,9 +36,9 @@ export default class FoodBowl extends GameObjects.Container {
         }).setOrigin(0.5);
         this.add(this.amountText);
         
-        // Type icon
+        // Type icon - create without adding to scene
         const icon = this.type === 'water' ? 'W' : 'F';
-        this.typeIcon = this.scene.add.text(25, -25, icon, {
+        this.typeIcon = new Phaser.GameObjects.Text(this.scene, 25, -25, icon, {
             fontSize: '20px'
         }).setOrigin(0.5);
         this.add(this.typeIcon);

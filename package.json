@@ -16,7 +16,8 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "phaser": "^3.70.0"
+    "phaser": "^3.70.0",
+    "puppeteer": "^24.15.0"
   },
   "devDependencies": {
     "@babel/core": "^7.28.0",

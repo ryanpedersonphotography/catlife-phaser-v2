@@ -14,19 +14,19 @@ export default class Room extends GameObjects.Container {
         // Create room visuals
         this.createRoom();
         
-        // Add to scene
-        scene.add.existing(this);
+        // Container is automatically added to scene when created, no need to add again
         this.setDepth(DEPTHS.ROOMS);
     }
     
     createRoom() {
-        // Room background
-        this.background = this.scene.add.image(0, 0, `room_${this.id}`)
+        // Room background - create without adding to scene
+        this.background = new Phaser.GameObjects.Image(this.scene, 0, 0, `room_${this.id}`)
             .setOrigin(0);
         this.add(this.background);
         
-        // Room label
-        this.label = this.scene.add.text(
+        // Room label - create without adding to scene
+        this.label = new Phaser.GameObjects.Text(
+            this.scene,
             this.width / 2,
             20,
             this.roomData.name,
@@ -72,14 +72,14 @@ export default class Room extends GameObjects.Container {
     }
     
     addKitchenDecorations() {
-        // Counter
-        const counter = this.scene.add.graphics();
+        // Counter - create without adding to scene
+        const counter = new Phaser.GameObjects.Graphics(this.scene);
         counter.fillStyle(0x8B6B47, 1);
         counter.fillRect(10, 100, this.width - 20, 30);
         this.add(counter);
         
-        // Sink
-        const sink = this.scene.add.graphics();
+        // Sink - create without adding to scene
+        const sink = new Phaser.GameObjects.Graphics(this.scene);
         sink.fillStyle(0xC0C0C0, 1);
         sink.fillCircle(100, 115, 20);
         sink.fillStyle(0x808080, 1);
@@ -88,16 +88,16 @@ export default class Room extends GameObjects.Container {
     }
     
     addLivingRoomDecorations() {
-        // Sofa
-        const sofa = this.scene.add.graphics();
+        // Sofa - create without adding to scene
+        const sofa = new Phaser.GameObjects.Graphics(this.scene);
         sofa.fillStyle(0x4169E1, 1);
         sofa.fillRoundedRect(50, 100, 200, 80, 10);
         sofa.fillStyle(0x6495ED, 1);
         sofa.fillRoundedRect(60, 110, 180, 60, 5);
         this.add(sofa);
         
-        // TV
-        const tv = this.scene.add.graphics();
+        // TV - create without adding to scene
+        const tv = new Phaser.GameObjects.Graphics(this.scene);
         tv.fillStyle(0x000000, 1);
         tv.fillRect(300, 50, 80, 60);
         tv.fillStyle(0x333333, 1);
@@ -106,31 +106,31 @@ export default class Room extends GameObjects.Container {
     }
     
     addBedroomDecorations() {
-        // Beds (visual only, actual cat beds are separate objects)
-        const bed1 = this.scene.add.graphics();
+        // Beds (visual only, actual cat beds are separate objects) - create without adding to scene
+        const bed1 = new Phaser.GameObjects.Graphics(this.scene);
         bed1.fillStyle(0x8B4513, 1);
         bed1.fillRoundedRect(100, 100, 150, 80, 10);
         bed1.fillStyle(0xFFFFFF, 1);
         bed1.fillRoundedRect(110, 110, 130, 60, 5);
         this.add(bed1);
         
-        // Nightstand
-        const nightstand = this.scene.add.graphics();
+        // Nightstand - create without adding to scene
+        const nightstand = new Phaser.GameObjects.Graphics(this.scene);
         nightstand.fillStyle(0x654321, 1);
         nightstand.fillRect(260, 120, 40, 40);
         this.add(nightstand);
     }
     
     addBathroomDecorations() {
-        // Toilet
-        const toilet = this.scene.add.graphics();
+        // Toilet - create without adding to scene
+        const toilet = new Phaser.GameObjects.Graphics(this.scene);
         toilet.fillStyle(0xFFFFFF, 1);
         toilet.fillEllipse(250, 100, 40, 50);
         toilet.fillRect(230, 100, 40, 40);
         this.add(toilet);
         
-        // Sink
-        const sink = this.scene.add.graphics();
+        // Sink - create without adding to scene
+        const sink = new Phaser.GameObjects.Graphics(this.scene);
         sink.fillStyle(0xFFFFFF, 1);
         sink.fillRoundedRect(50, 50, 60, 40, 10);
         sink.fillStyle(0xC0C0C0, 1);
@@ -141,7 +141,7 @@ export default class Room extends GameObjects.Container {
     addOutsideDecorations() {
         // Trees
         for (let i = 0; i < 3; i++) {
-            const tree = this.scene.add.graphics();
+            const tree = new Phaser.GameObjects.Graphics(this.scene);
             const x = 50 + i * 80;
             const y = 100 + Math.random() * 50;
             
@@ -160,7 +160,7 @@ export default class Room extends GameObjects.Container {
         
         // Flowers
         for (let i = 0; i < 10; i++) {
-            const flower = this.scene.add.graphics();
+            const flower = new Phaser.GameObjects.Graphics(this.scene);
             const x = Math.random() * this.width;
             const y = 200 + Math.random() * (this.height - 250);
             

@@ -44,8 +44,6 @@ export const ROOM_TYPES = {
     LIVING_ROOM: 'livingRoom',
     BEDROOM: 'bedroom',
     BATHROOM: 'bathroom',
-    DINING_ROOM: 'diningRoom',
-    HALLWAY: 'hallway',
     OUTSIDE: 'outside'
 };
 
@@ -98,4 +96,56 @@ export const SAVE_KEYS = {
     GAME_STATE: 'catlife_gamestate',
     SETTINGS: 'catlife_settings',
     STATISTICS: 'catlife_statistics'
+};
+
+// Original CatLife game mechanics
+export const GAME_MECHANICS = {
+    DIFFICULTY: {
+        EASY: { energyCost: 0.8, messFrequency: 0.7, conflictChance: 0.5 },
+        NORMAL: { energyCost: 1.0, messFrequency: 1.0, conflictChance: 1.0 },
+        HARD: { energyCost: 1.3, messFrequency: 1.5, conflictChance: 1.5 }
+    },
+    ENERGY: {
+        MAX: 100,
+        FEED_COST: 5,
+        PLAY_COST: 10,
+        CLEAN_COST: 8,
+        MOVE_CAT_COST: 3,
+        PET_COST: 2,
+        DOOR_COST: 2
+    },
+    SCORING: {
+        FEED_CAT: 10,
+        PLAY_WITH_CAT: 15,
+        CLEAN_MESS: 20,
+        RESOLVE_CONFLICT: 25,
+        PET_CAT: 5,
+        SPECIAL_CARE_BONUS: 30, // For Tink
+        ALL_CATS_FED: 50,
+        ALL_CATS_HAPPY: 100,
+        UNHAPPY_CAT_PENALTY: -5,
+        CONFLICT_PENALTY: -10,
+        MESS_PENALTY: -5
+    },
+    MESS_TYPES: {
+        POOP: { emoji: '💩', cleanTime: 3, penalty: 10 },
+        PEE: { emoji: '💦', cleanTime: 2, penalty: 5 }
+    },
+    CONFLICT: {
+        DAMAGE_PER_TICK: 5, // Health/happiness damage
+        RESOLUTION_DISTANCE: 2 // Rooms apart needed
+    }
+};
+
+// Cat-specific behaviors from original game
+export const CAT_BEHAVIORS = {
+    FOOD_STEALING: 'foodStealing', // Gusty
+    POOP_ANYWHERE: 'poopAnywhere', // Snicker
+    PEE_ANYWHERE: 'peeAnywhere', // Scampi
+    AGGRESSIVE: 'aggressive', // Rudy
+    NEEDS_ATTENTION: 'needsAttention', // Tink
+    ALOOF: 'aloof', // Stinky Lee
+    GENTLE: 'gentle', // Jonah
+    INDEPENDENT: 'independent', // Lucy
+    ELEGANT: 'elegant' // Giselle
 };

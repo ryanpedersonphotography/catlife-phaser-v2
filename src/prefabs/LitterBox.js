@@ -14,8 +14,7 @@ export default class LitterBox extends GameObjects.Container {
         // Create visuals
         this.createLitterBox();
         
-        // Add to scene
-        scene.add.existing(this);
+        // Container is automatically added to scene when created, no need to add again
         this.setDepth(DEPTHS.OBJECTS);
         
         // Make interactive
@@ -24,12 +23,12 @@ export default class LitterBox extends GameObjects.Container {
     }
     
     createLitterBox() {
-        // Litter box sprite
-        this.boxSprite = this.scene.add.image(0, 0, 'litter_box_clean');
+        // Litter box sprite - create without adding to scene
+        this.boxSprite = new Phaser.GameObjects.Image(this.scene, 0, 0, 'litter_box_clean');
         this.add(this.boxSprite);
         
-        // Cleanliness indicator
-        this.cleanlinessText = this.scene.add.text(0, -35, '100%', {
+        // Cleanliness indicator - create without adding to scene
+        this.cleanlinessText = new Phaser.GameObjects.Text(this.scene, 0, -35, '100%', {
             fontSize: '14px',
             fontStyle: 'bold',
             color: '#66ff66',
@@ -38,8 +37,8 @@ export default class LitterBox extends GameObjects.Container {
         }).setOrigin(0.5);
         this.add(this.cleanlinessText);
         
-        // Room label
-        this.roomLabel = this.scene.add.text(0, 35, this.roomId, {
+        // Room label - create without adding to scene
+        this.roomLabel = new Phaser.GameObjects.Text(this.scene, 0, 35, this.roomId, {
             fontSize: '12px',
             color: '#ffffff',
             stroke: '#000000',
@@ -53,8 +52,8 @@ export default class LitterBox extends GameObjects.Container {
         this.cleanliness = Math.max(0, this.cleanliness - 20);
         this.updateDisplay();
         
-        // Add mess visual
-        const mess = this.scene.add.graphics();
+        // Add mess visual - create without adding to scene
+        const mess = new Phaser.GameObjects.Graphics(this.scene);
         mess.fillStyle(0x8B4513, 0.5);
         mess.fillCircle(
             Phaser.Math.Between(-15, 15),
@@ -128,7 +127,7 @@ export default class LitterBox extends GameObjects.Container {
         // Add warning if full
         if (this.isFull()) {
             if (!this.fullWarning) {
-                this.fullWarning = this.scene.add.text(0, 0, '❌', {
+                this.fullWarning = new Phaser.GameObjects.Text(this.scene, 0, 0, '❌', {
                     fontSize: '24px'
                 }).setOrigin(0.5);
                 this.add(this.fullWarning);

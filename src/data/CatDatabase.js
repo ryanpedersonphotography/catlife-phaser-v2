@@ -1,116 +1,27 @@
 export const CAT_DATABASE = {
-    whiskers: {
-        id: 'whiskers',
-        name: 'Whiskers',
-        age: 3,
-        color: '#FF6B6B',
-        personality: {
-            friendliness: 0.8,
-            playfulness: 0.9,
-            independence: 0.4,
-            vocality: 0.7,
-            sleepiness: 0.3
-        },
-        preferences: {
-            favoriteRoom: 'livingRoom',
-            litterPreference: 'open',
-            foodPreference: 'wet',
-            sleepSpot: 'windowsill'
-        },
-        conflicts: [],
-        backstory: 'Whiskers is a playful coral-colored cat who loves attention.',
-        sprite: {
-            texture: 'cat_whiskers',
-            animations: {
-                idle: { frames: [0, 1], fps: 2 },
-                walk: { frames: [2, 3, 4, 5], fps: 8 },
-                sleep: { frames: [6, 7], fps: 1 }
-            }
-        }
-    },
-    
-    simba: {
-        id: 'simba',
-        name: 'Simba',
-        age: 5,
-        color: '#FF9F1C',
-        personality: {
-            friendliness: 0.9,
-            playfulness: 0.8,
-            independence: 0.5,
-            vocality: 0.8,
-            sleepiness: 0.4
-        },
-        preferences: {
-            favoriteRoom: 'livingRoom',
-            litterPreference: 'covered',
-            foodPreference: 'dry',
-            sleepSpot: 'couch'
-        },
-        conflicts: [],
-        backstory: 'Simba is a majestic orange cat with a regal personality.',
-        sprite: {
-            texture: 'cat_simba',
-            animations: {
-                idle: { frames: [0, 1], fps: 2 },
-                walk: { frames: [2, 3, 4, 5], fps: 8 },
-                sleep: { frames: [6, 7], fps: 1 }
-            }
-        }
-    },
-    
-    luna: {
-        id: 'luna',
-        name: 'Luna',
+    gusty: {
+        id: 'gusty',
+        name: 'Gusty',
         age: 4,
-        color: '#9B59B6',
+        color: '#FF9F1C', // Orange
         personality: {
-            friendliness: 0.6,
-            playfulness: 0.5,
-            independence: 0.8,
-            vocality: 0.4,
-            sleepiness: 0.7
-        },
-        preferences: {
-            favoriteRoom: 'bedroom',
-            litterPreference: 'quiet',
-            foodPreference: 'wet',
-            sleepSpot: 'bed'
-        },
-        conflicts: [],
-        backstory: 'Luna is a mysterious purple cat who prefers quiet spaces.',
-        sprite: {
-            texture: 'cat_luna',
-            animations: {
-                idle: { frames: [0, 1], fps: 2 },
-                walk: { frames: [2, 3, 4, 5], fps: 8 },
-                sleep: { frames: [6, 7], fps: 1 }
-            }
-        }
-    },
-    
-    tigger: {
-        id: 'tigger',
-        name: 'Tigger',
-        age: 2,
-        color: '#F39C12',
-        personality: {
-            friendliness: 0.8,
-            playfulness: 0.9,
-            independence: 0.3,
-            vocality: 0.9,
-            sleepiness: 0.2
+            friendliness: 0.7,
+            playfulness: 0.6,
+            independence: 0.5,
+            vocality: 0.6,
+            sleepiness: 0.4
         },
         preferences: {
             favoriteRoom: 'kitchen',
             litterPreference: 'open',
-            foodPreference: 'wet',
-            sleepSpot: 'anywhere'
+            foodPreference: 'any', // Will steal others' food
+            sleepSpot: 'kitchen'
         },
-        conflicts: [],
-        backstory: 'Tigger is a bouncy golden kitten full of energy.',
+        conflicts: ['snicker'],
+        specialTrait: 'always eats other cats\' food',
+        backstory: 'Gusty is an orange cat who steals food from other cats.',
         sprite: {
-            texture: 'cat_tigger',
+            texture: 'cat_gusty',
             animations: {
                 idle: { frames: [0, 1], fps: 2 },
                 walk: { frames: [2, 3, 4, 5], fps: 8 },
@@ -119,58 +30,29 @@ export const CAT_DATABASE = {
         }
     },
     
-    smokey: {
-        id: 'smokey',
-        name: 'Smokey',
-        age: 7,
-        color: '#7F8C8D',
+    snicker: {
+        id: 'snicker',
+        name: 'Snicker',
+        age: 5,
+        color: '#8B4513', // Brown
         personality: {
-            friendliness: 0.5,
-            playfulness: 0.4,
-            independence: 0.9,
-            vocality: 0.3,
-            sleepiness: 0.8
-        },
-        preferences: {
-            favoriteRoom: 'bedroom',
-            litterPreference: 'covered',
-            foodPreference: 'dry',
-            sleepSpot: 'closet'
-        },
-        conflicts: [],
-        backstory: 'Smokey is a calm gray cat who enjoys solitude.',
-        sprite: {
-            texture: 'cat_smokey',
-            animations: {
-                idle: { frames: [0, 1], fps: 2 },
-                walk: { frames: [2, 3, 4, 5], fps: 8 },
-                sleep: { frames: [6, 7], fps: 1 }
-            }
-        }
-    },
-    
-    patches: {
-        id: 'patches',
-        name: 'Patches',
-        age: 6,
-        color: '#E74C3C',
-        personality: {
-            friendliness: 0.7,
-            playfulness: 0.6,
+            friendliness: 0.6,
+            playfulness: 0.5,
             independence: 0.6,
             vocality: 0.5,
             sleepiness: 0.5
         },
         preferences: {
-            favoriteRoom: 'livingRoom',
-            litterPreference: 'open',
+            favoriteRoom: 'livingroom',
+            litterPreference: 'anywhere', // Has accidents
             foodPreference: 'wet',
             sleepSpot: 'couch'
         },
-        conflicts: [],
-        backstory: 'Patches has distinctive red and white markings.',
+        conflicts: ['gusty'],
+        specialTrait: 'poops everywhere',
+        backstory: 'Snicker is a brown cat with bathroom issues.',
         sprite: {
-            texture: 'cat_patches',
+            texture: 'cat_snicker',
             animations: {
                 idle: { frames: [0, 1], fps: 2 },
                 walk: { frames: [2, 3, 4, 5], fps: 8 },
@@ -179,388 +61,125 @@ export const CAT_DATABASE = {
         }
     },
     
-    shadow: {
-        id: 'shadow',
-        name: 'Shadow',
-        age: 8,
-        color: '#2C3E50',
+    rudy: {
+        id: 'rudy',
+        name: 'Rudy',
+        age: 6,
+        color: '#E74C3C', // Red
+        personality: {
+            friendliness: 0.3,
+            playfulness: 0.4,
+            independence: 0.8,
+            vocality: 0.7,
+            sleepiness: 0.5
+        },
+        preferences: {
+            favoriteRoom: 'bedroom',
+            litterPreference: 'private',
+            foodPreference: 'dry',
+            sleepSpot: 'bed'
+        },
+        conflicts: ['scampi', 'stinkylee', 'lucy'],
+        specialTrait: 'fights with other cats',
+        aggression: 80,
+        backstory: 'Rudy is an aggressive red cat who fights with others.',
+        sprite: {
+            texture: 'cat_rudy',
+            animations: {
+                idle: { frames: [0, 1], fps: 2 },
+                walk: { frames: [2, 3, 4, 5], fps: 8 },
+                sleep: { frames: [6, 7], fps: 1 }
+            }
+        }
+    },
+    
+    scampi: {
+        id: 'scampi',
+        name: 'Scampi',
+        age: 3,
+        color: '#FDD835', // Yellow
+        personality: {
+            friendliness: 0.6,
+            playfulness: 0.7,
+            independence: 0.5,
+            vocality: 0.6,
+            sleepiness: 0.4
+        },
+        preferences: {
+            favoriteRoom: 'kitchen',
+            litterPreference: 'litterbox', // nervous, prefers litter box
+            foodPreference: 'wet',
+            sleepSpot: 'sunny spots'
+        },
+        conflicts: ['rudy'],
+        specialTrait: 'pees everywhere',
+        bathroomPreference: 'litterbox',
+        backstory: 'Scampi is a yellow cat who marks territory inappropriately.',
+        sprite: {
+            texture: 'cat_scampi',
+            animations: {
+                idle: { frames: [0, 1], fps: 2 },
+                walk: { frames: [2, 3, 4, 5], fps: 8 },
+                sleep: { frames: [6, 7], fps: 1 }
+            }
+        }
+    },
+    
+    stinkylee: {
+        id: 'stinkylee',
+        name: 'Stinky Lee',
+        age: 7,
+        color: '#4A148C', // Indigo
         personality: {
             friendliness: 0.4,
             playfulness: 0.3,
             independence: 0.9,
             vocality: 0.2,
-            sleepiness: 0.8
-        },
-        preferences: {
-            favoriteRoom: 'hallway',
-            litterPreference: 'private',
-            foodPreference: 'dry',
-            sleepSpot: 'dark corners'
-        },
-        conflicts: [],
-        backstory: 'Shadow is a dark gray cat who prefers to observe from afar.',
-        sprite: {
-            texture: 'cat_shadow',
-            animations: {
-                idle: { frames: [0, 1], fps: 2 },
-                walk: { frames: [2, 3, 4, 5], fps: 8 },
-                sleep: { frames: [6, 7], fps: 1 }
-            }
-        }
-    },
-    
-    oreo: {
-        id: 'oreo',
-        name: 'Oreo',
-        age: 3,
-        color: '#000000',
-        personality: {
-            friendliness: 0.8,
-            playfulness: 0.7,
-            independence: 0.5,
-            vocality: 0.6,
-            sleepiness: 0.4
-        },
-        preferences: {
-            favoriteRoom: 'kitchen',
-            litterPreference: 'open',
-            foodPreference: 'wet',
-            sleepSpot: 'sunny spots'
-        },
-        conflicts: [],
-        backstory: 'Oreo is a black and white cat with a sweet personality.',
-        sprite: {
-            texture: 'cat_oreo',
-            animations: {
-                idle: { frames: [0, 1], fps: 2 },
-                walk: { frames: [2, 3, 4, 5], fps: 8 },
-                sleep: { frames: [6, 7], fps: 1 }
-            }
-        }
-    },
-    
-    mittens: {
-        id: 'mittens',
-        name: 'Mittens',
-        age: 5,
-        color: '#ECF0F1',
-        personality: {
-            friendliness: 0.9,
-            playfulness: 0.6,
-            independence: 0.4,
-            vocality: 0.7,
-            sleepiness: 0.5
-        },
-        preferences: {
-            favoriteRoom: 'bedroom',
-            litterPreference: 'covered',
-            foodPreference: 'wet',
-            sleepSpot: 'bed'
-        },
-        conflicts: [],
-        backstory: 'Mittens is a pristine white cat who loves to cuddle.',
-        sprite: {
-            texture: 'cat_mittens',
-            animations: {
-                idle: { frames: [0, 1], fps: 2 },
-                walk: { frames: [2, 3, 4, 5], fps: 8 },
-                sleep: { frames: [6, 7], fps: 1 }
-            }
-        }
-    },
-    
-    felix: {
-        id: 'felix',
-        name: 'Felix',
-        age: 6,
-        color: '#34495E',
-        personality: {
-            friendliness: 0.6,
-            playfulness: 0.5,
-            independence: 0.7,
-            vocality: 0.4,
-            sleepiness: 0.6
-        },
-        preferences: {
-            favoriteRoom: 'diningRoom',
-            litterPreference: 'open',
-            foodPreference: 'dry',
-            sleepSpot: 'chair'
-        },
-        conflicts: [],
-        backstory: 'Felix is a charcoal-colored cat with a classic demeanor.',
-        sprite: {
-            texture: 'cat_felix',
-            animations: {
-                idle: { frames: [0, 1], fps: 2 },
-                walk: { frames: [2, 3, 4, 5], fps: 8 },
-                sleep: { frames: [6, 7], fps: 1 }
-            }
-        }
-    },
-    
-    coco: {
-        id: 'coco',
-        name: 'Coco',
-        age: 4,
-        color: '#8B4513',
-        personality: {
-            friendliness: 0.7,
-            playfulness: 0.6,
-            independence: 0.6,
-            vocality: 0.5,
-            sleepiness: 0.5
-        },
-        preferences: {
-            favoriteRoom: 'livingRoom',
-            litterPreference: 'covered',
-            foodPreference: 'wet',
-            sleepSpot: 'carpet'
-        },
-        conflicts: [],
-        backstory: 'Coco is a warm brown cat with a sweet nature.',
-        sprite: {
-            texture: 'cat_coco',
-            animations: {
-                idle: { frames: [0, 1], fps: 2 },
-                walk: { frames: [2, 3, 4, 5], fps: 8 },
-                sleep: { frames: [6, 7], fps: 1 }
-            }
-        }
-    },
-    
-    pepper: {
-        id: 'pepper',
-        name: 'Pepper',
-        age: 5,
-        color: '#5D6D7E',
-        personality: {
-            friendliness: 0.6,
-            playfulness: 0.5,
-            independence: 0.7,
-            vocality: 0.4,
-            sleepiness: 0.6
-        },
-        preferences: {
-            favoriteRoom: 'kitchen',
-            litterPreference: 'open',
-            foodPreference: 'dry',
-            sleepSpot: 'counter'
-        },
-        conflicts: [],
-        backstory: 'Pepper is a blue-gray cat with a spicy personality.',
-        sprite: {
-            texture: 'cat_pepper',
-            animations: {
-                idle: { frames: [0, 1], fps: 2 },
-                walk: { frames: [2, 3, 4, 5], fps: 8 },
-                sleep: { frames: [6, 7], fps: 1 }
-            }
-        }
-    },
-    
-    boots: {
-        id: 'boots',
-        name: 'Boots',
-        age: 7,
-        color: '#D35400',
-        personality: {
-            friendliness: 0.8,
-            playfulness: 0.7,
-            independence: 0.5,
-            vocality: 0.6,
-            sleepiness: 0.4
-        },
-        preferences: {
-            favoriteRoom: 'hallway',
-            litterPreference: 'covered',
-            foodPreference: 'wet',
-            sleepSpot: 'mat'
-        },
-        conflicts: [],
-        backstory: 'Boots is a burnt orange cat who loves to explore.',
-        sprite: {
-            texture: 'cat_boots',
-            animations: {
-                idle: { frames: [0, 1], fps: 2 },
-                walk: { frames: [2, 3, 4, 5], fps: 8 },
-                sleep: { frames: [6, 7], fps: 1 }
-            }
-        }
-    },
-    
-    bella: {
-        id: 'bella',
-        name: 'Bella',
-        age: 3,
-        color: '#F8BBD0',
-        personality: {
-            friendliness: 0.9,
-            playfulness: 0.8,
-            independence: 0.3,
-            vocality: 0.8,
-            sleepiness: 0.3
-        },
-        preferences: {
-            favoriteRoom: 'bedroom',
-            litterPreference: 'covered',
-            foodPreference: 'wet',
-            sleepSpot: 'pillow'
-        },
-        conflicts: [],
-        backstory: 'Bella is a beautiful pink cat who loves attention.',
-        sprite: {
-            texture: 'cat_bella',
-            animations: {
-                idle: { frames: [0, 1], fps: 2 },
-                walk: { frames: [2, 3, 4, 5], fps: 8 },
-                sleep: { frames: [6, 7], fps: 1 }
-            }
-        }
-    },
-    
-    milo: {
-        id: 'milo',
-        name: 'Milo',
-        age: 4,
-        color: '#FFAB00',
-        personality: {
-            friendliness: 0.8,
-            playfulness: 0.7,
-            independence: 0.5,
-            vocality: 0.6,
-            sleepiness: 0.4
-        },
-        preferences: {
-            favoriteRoom: 'livingRoom',
-            litterPreference: 'open',
-            foodPreference: 'dry',
-            sleepSpot: 'sunny spot'
-        },
-        conflicts: [],
-        backstory: 'Milo is an amber-colored cat with a cheerful disposition.',
-        sprite: {
-            texture: 'cat_milo',
-            animations: {
-                idle: { frames: [0, 1], fps: 2 },
-                walk: { frames: [2, 3, 4, 5], fps: 8 },
-                sleep: { frames: [6, 7], fps: 1 }
-            }
-        }
-    },
-    
-    nala: {
-        id: 'nala',
-        name: 'Nala',
-        age: 6,
-        color: '#FDD835',
-        personality: {
-            friendliness: 0.7,
-            playfulness: 0.6,
-            independence: 0.6,
-            vocality: 0.5,
-            sleepiness: 0.5
-        },
-        preferences: {
-            favoriteRoom: 'kitchen',
-            litterPreference: 'covered',
-            foodPreference: 'wet',
-            sleepSpot: 'windowsill'
-        },
-        conflicts: [],
-        backstory: 'Nala is a bright yellow cat with a sunny personality.',
-        sprite: {
-            texture: 'cat_nala',
-            animations: {
-                idle: { frames: [0, 1], fps: 2 },
-                walk: { frames: [2, 3, 4, 5], fps: 8 },
-                sleep: { frames: [6, 7], fps: 1 }
-            }
-        }
-    },
-    
-    oliver: {
-        id: 'oliver',
-        name: 'Oliver',
-        age: 5,
-        color: '#43A047',
-        personality: {
-            friendliness: 0.6,
-            playfulness: 0.5,
-            independence: 0.7,
-            vocality: 0.4,
-            sleepiness: 0.6
-        },
-        preferences: {
-            favoriteRoom: 'diningRoom',
-            litterPreference: 'open',
-            foodPreference: 'dry',
-            sleepSpot: 'chair'
-        },
-        conflicts: [],
-        backstory: 'Oliver is a unique green-tinted cat with a calm nature.',
-        sprite: {
-            texture: 'cat_oliver',
-            animations: {
-                idle: { frames: [0, 1], fps: 2 },
-                walk: { frames: [2, 3, 4, 5], fps: 8 },
-                sleep: { frames: [6, 7], fps: 1 }
-            }
-        }
-    },
-    
-    roxy: {
-        id: 'roxy',
-        name: 'Roxy',
-        age: 3,
-        color: '#E91E63',
-        personality: {
-            friendliness: 0.8,
-            playfulness: 0.9,
-            independence: 0.4,
-            vocality: 0.8,
-            sleepiness: 0.2
-        },
-        preferences: {
-            favoriteRoom: 'livingRoom',
-            litterPreference: 'open',
-            foodPreference: 'wet',
-            sleepSpot: 'anywhere'
-        },
-        conflicts: [],
-        backstory: 'Roxy is a vibrant hot pink cat with lots of energy.',
-        sprite: {
-            texture: 'cat_roxy',
-            animations: {
-                idle: { frames: [0, 1], fps: 2 },
-                walk: { frames: [2, 3, 4, 5], fps: 8 },
-                sleep: { frames: [6, 7], fps: 1 }
-            }
-        }
-    },
-    
-    chester: {
-        id: 'chester',
-        name: 'Chester',
-        age: 8,
-        color: '#FF5722',
-        personality: {
-            friendliness: 0.6,
-            playfulness: 0.4,
-            independence: 0.8,
-            vocality: 0.5,
             sleepiness: 0.7
         },
         preferences: {
             favoriteRoom: 'bedroom',
-            litterPreference: 'covered',
+            litterPreference: 'outside', // independent, goes outside
             foodPreference: 'dry',
-            sleepSpot: 'bed'
+            sleepSpot: 'dark corners'
+        },
+        conflicts: ['rudy'],
+        specialTrait: 'mysterious and aloof',
+        bathroomPreference: 'outside',
+        backstory: 'Stinky Lee is a mysterious indigo cat who prefers solitude.',
+        sprite: {
+            texture: 'cat_stinkylee',
+            animations: {
+                idle: { frames: [0, 1], fps: 2 },
+                walk: { frames: [2, 3, 4, 5], fps: 8 },
+                sleep: { frames: [6, 7], fps: 1 }
+            }
+        }
+    },
+    
+    jonah: {
+        id: 'jonah',
+        name: 'Jonah',
+        age: 5,
+        color: '#2196F3', // Blue
+        personality: {
+            friendliness: 0.9,
+            playfulness: 0.6,
+            independence: 0.4,
+            vocality: 0.5,
+            sleepiness: 0.6
+        },
+        preferences: {
+            favoriteRoom: 'livingroom',
+            litterPreference: 'clean',
+            foodPreference: 'wet',
+            sleepSpot: 'couch'
         },
         conflicts: [],
-        backstory: 'Chester is a deep orange cat who enjoys his independence.',
+        specialTrait: 'gentle soul',
+        backstory: 'Jonah is a gentle blue cat who gets along with everyone.',
         sprite: {
-            texture: 'cat_chester',
+            texture: 'cat_jonah',
             animations: {
                 idle: { frames: [0, 1], fps: 2 },
                 walk: { frames: [2, 3, 4, 5], fps: 8 },
@@ -573,29 +192,93 @@ export const CAT_DATABASE = {
         id: 'tink',
         name: 'Tink',
         age: 4,
-        color: '#FDD835',
+        color: '#E91E63', // Pink
         personality: {
             friendliness: 0.9,
-            playfulness: 0.9,
+            playfulness: 0.8,
             independence: 0.2,
-            vocality: 0.8,
-            sleepiness: 0.2
-        },
-        specialNeeds: {
-            condition: 'Special Cat',
-            requirement: 'Extra attention and care',
-            reason: 'Unique personality'
+            vocality: 0.9,
+            sleepiness: 0.3
         },
         preferences: {
             favoriteRoom: 'bathroom',
             litterPreference: 'any',
-            foodPreference: 'any',
-            sleepSpot: 'your lap'
+            foodPreference: 'wet',
+            sleepSpot: 'bathroom'
         },
         conflicts: [],
-        backstory: 'Tink is a special yellow cat with an extra loving personality.',
+        specialTrait: 'needs extra attention, loves bathroom',
+        specialNeeds: {
+            condition: 'High Maintenance',
+            requirement: 'Extra attention and care',
+            morningRoutine: true,
+            bathroomTime: true
+        },
+        backstory: 'Tink is a pink cat who needs extra attention and loves the bathroom.',
         sprite: {
             texture: 'cat_tink',
+            animations: {
+                idle: { frames: [0, 1], fps: 2 },
+                walk: { frames: [2, 3, 4, 5], fps: 8 },
+                sleep: { frames: [6, 7], fps: 1 }
+            }
+        }
+    },
+    
+    lucy: {
+        id: 'lucy',
+        name: 'Lucy',
+        age: 6,
+        color: '#424242', // Dark gray
+        personality: {
+            friendliness: 0.5,
+            playfulness: 0.6,
+            independence: 0.8,
+            vocality: 0.6,
+            sleepiness: 0.5
+        },
+        preferences: {
+            favoriteRoom: 'bedroom',
+            litterPreference: 'private',
+            foodPreference: 'dry',
+            sleepSpot: 'bed'
+        },
+        conflicts: ['rudy'],
+        specialTrait: 'independent and feisty',
+        backstory: 'Lucy is an independent dark gray cat with a feisty personality.',
+        sprite: {
+            texture: 'cat_lucy',
+            animations: {
+                idle: { frames: [0, 1], fps: 2 },
+                walk: { frames: [2, 3, 4, 5], fps: 8 },
+                sleep: { frames: [6, 7], fps: 1 }
+            }
+        }
+    },
+    
+    giselle: {
+        id: 'giselle',
+        name: 'Giselle',
+        age: 5,
+        color: '#F5F5DC', // Creme
+        personality: {
+            friendliness: 0.8,
+            playfulness: 0.5,
+            independence: 0.6,
+            vocality: 0.4,
+            sleepiness: 0.6
+        },
+        preferences: {
+            favoriteRoom: 'livingroom',
+            litterPreference: 'clean',
+            foodPreference: 'wet',
+            sleepSpot: 'sunny spots'
+        },
+        conflicts: [],
+        specialTrait: 'graceful and elegant',
+        backstory: 'Giselle is an elegant creme-colored cat with graceful movements.',
+        sprite: {
+            texture: 'cat_giselle',
             animations: {
                 idle: { frames: [0, 1], fps: 2 },
                 walk: { frames: [2, 3, 4, 5], fps: 8 },
@@ -620,4 +303,12 @@ export function getCatsByRoom(room) {
 export function getConflictingCats(catId) {
     const cat = getCatById(catId);
     return cat ? cat.conflicts : [];
+}
+
+export function getCatsWithSpecialNeeds() {
+    return Object.values(CAT_DATABASE).filter(cat => cat.specialNeeds);
+}
+
+export function getCatsWithTraits() {
+    return Object.values(CAT_DATABASE).filter(cat => cat.specialTrait);
 }

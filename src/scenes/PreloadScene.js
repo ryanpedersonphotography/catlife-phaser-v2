@@ -108,10 +108,10 @@ export default class PreloadScene extends Scene {
             const key = `cat_${color}`;
             console.log(`Loading sprite sheet: ${key} from ${filename}`);
             
-            // Each sprite sheet has 64x64 pixel sprites in a grid
+            // Each sprite sheet has 64x60 pixel sprites in a grid (480px / 8 rows = 60px per row)
             this.load.spritesheet(key, filename, {
                 frameWidth: 64,
-                frameHeight: 64,
+                frameHeight: 60,
                 margin: 0,
                 spacing: 0
             });
@@ -129,29 +129,18 @@ export default class PreloadScene extends Scene {
         this.load.image('icon_heart', 'icon_heart.png');
     }
 
-    // Map cat colors to available sprite colors
+    // Map cat colors to available sprite colors (original 9 cats)
     getClosestSpriteColor(hexColor) {
         const colorMap = {
-            '#FF6B6B': 'pink',      // Whiskers - coral to pink
-            '#FF9F1C': 'orange',    // Simba - orange
-            '#9B59B6': 'pink',      // Luna - purple to pink
-            '#F39C12': 'orange',    // Tigger - golden to orange
-            '#7F8C8D': 'gray',      // Smokey - gray
-            '#E74C3C': 'orange',    // Patches - red to orange
-            '#2C3E50': 'gray',      // Shadow - dark gray
-            '#000000': 'black',     // Oreo - black
-            '#ECF0F1': 'gray',      // Mittens - white to gray
-            '#34495E': 'gray',      // Felix - charcoal to gray
-            '#8B4513': 'brown',     // Coco - brown
-            '#5D6D7E': 'gray',      // Pepper - blue-gray
-            '#D35400': 'orange',    // Boots - burnt orange
-            '#F8BBD0': 'pink',      // Bella - pink
-            '#FFAB00': 'orange',    // Milo - amber to orange
-            '#FDD835': 'yellow',    // Nala - yellow
-            '#43A047': 'green',     // Oliver - green
-            '#E91E63': 'pink',      // Roxy - hot pink
-            '#FF5722': 'orange',    // Chester - deep orange
-            '#FDD835': 'yellow'     // Tink - yellow
+            '#FF9F1C': 'orange',    // Gusty - orange
+            '#8B4513': 'brown',     // Snicker - brown
+            '#E74C3C': 'red',       // Rudy - red
+            '#FDD835': 'yellow',    // Scampi - yellow
+            '#4A148C': 'pink',      // Stinky Lee - indigo (use pink for now)
+            '#2196F3': 'blue',      // Jonah - blue
+            '#E91E63': 'pink',      // Tink - pink
+            '#424242': 'gray',      // Lucy - dark gray
+            '#F5F5DC': 'white'      // Giselle - creme (use white)
         };
         
         return colorMap[hexColor] || 'gray';
@@ -159,22 +148,13 @@ export default class PreloadScene extends Scene {
 
     generateCatSprites() {
         console.log('Setting up cat sprites from loaded sprite sheets...');
-        const cats = getAllCats();
-        
-        cats.forEach(cat => {
-            const spriteColor = this.getClosestSpriteColor(cat.color);
-            const spriteSheetKey = `cat_${spriteColor}`;
-            
-            console.log(`Mapping ${cat.name} (${cat.color}) to sprite sheet: ${spriteSheetKey}`);
-            
-            // Update the cat's texture to use the sprite sheet
-            cat.sprite.texture = spriteSheetKey;
-            cat.spriteSheetKey = spriteSheetKey;
-        });
+        // This method is no longer needed - the color mapping happens in Cat.js
+        // when each cat is created. The sprite sheets are already loaded at this point.
     }
 
 
     generateRoomBackgrounds() {
+        console.log('Generating room backgrounds...');
         const rooms = {
             kitchen: { color: 0xFFE5CC, width: 350, height: 250 },
             diningRoom: { color: 0xF0E5CF, width: 350, height: 250 },
@@ -189,12 +169,12 @@ export default class PreloadScene extends Scene {
             const graphics = this.make.graphics({ x: 0, y: 0 }, false);
             
             // Background
-            graphics.fillStyle(config.color, 0.3);
+            graphics.fillStyle(config.color, 0.5);
             graphics.fillRect(0, 0, config.width, config.height);
             
             // Border
-            graphics.lineStyle(3, config.color, 1);
-            graphics.strokeRect(0, 0, config.width, config.height);
+            graphics.lineStyle(2, config.color, 0.8);
+            graphics.strokeRect(1, 1, config.width - 2, config.height - 2);
             
             // Add some texture
             graphics.fillStyle(config.color, 0.1);
@@ -428,7 +408,7 @@ export default class PreloadScene extends Scene {
             const spriteKey = `cat_${color}`;
             
             if (this.textures.exists(spriteKey)) {
-                // Based on the sprite sheet layout (16 frames per row at 64x64):
+                // Based on the sprite sheet layout (16 frames per row at 64x60):
                 // Row 1 (frames 0-15): Sitting down
                 // Row 2 (frames 16-31): Looking around  
                 // Row 3 (frames 32-47): Laying down

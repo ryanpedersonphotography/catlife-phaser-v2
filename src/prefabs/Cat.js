@@ -38,27 +38,32 @@ export default class Cat extends GameObjects.Container {
         // Create sprite
         this.createSprite();
 
-        // Add to scene
-        scene.add.existing(this);
+        // Container is automatically added to scene when created, no need to add again
         this.setDepth(DEPTHS.CATS);
 
-        // Make the sprite itself interactive instead of the container
-        // This avoids the black rectangle issue
-        this.sprite.setInteractive({ 
-            draggable: true,
-            useHandCursor: true
-        });
+        // Set the hit area for the container to match the sprite bounds
+        // This avoids the black rectangle issue while keeping interaction on the container
+        const hitArea = new Phaser.Geom.Rectangle(
+            -this.sprite.width * this.sprite.scaleX / 2,
+            -this.sprite.height * this.sprite.scaleY / 2,
+            this.sprite.width * this.sprite.scaleX,
+            this.sprite.height * this.sprite.scaleY
+        );
         
-        // Set up drag events on the sprite
-        this.sprite.on('dragstart', () => this.startDrag());
-        this.sprite.on('drag', (pointer, dragX, dragY) => {
+        this.setInteractive(hitArea, Phaser.Geom.Rectangle.Contains);
+        this.input.draggable = true;
+        this.input.cursor = 'pointer';
+        
+        // Set up drag events on the container
+        this.on('dragstart', () => this.startDrag());
+        this.on('drag', (pointer, dragX, dragY) => {
             this.x = dragX;
             this.y = dragY;
         });
-        this.sprite.on('dragend', () => this.endDrag());
+        this.on('dragend', () => this.endDrag());
         
-        // Also make the sprite clickable
-        this.sprite.on('pointerdown', () => {
+        // Also make the container clickable
+        this.on('pointerdown', () => {
             this.scene.handleCatClick(this);
         });
 
@@ -66,28 +71,26 @@ export default class Cat extends GameObjects.Container {
     }
 
     createSprite() {
-        // Define color mapping directly here to avoid dependency issues
+        console.log(`Cat ${this.data.name}: createSprite() called`);
+        
+        // Check if sprite already exists
+        if (this.sprite) {
+            console.warn(`Cat ${this.data.name}: Sprite already exists! Removing old sprite.`);
+            this.remove(this.sprite);
+            this.sprite.destroy();
+        }
+        
+        // Define color mapping for original 9 cats
         const colorMap = {
-            '#FF6B6B': 'pink',
-            '#FF9F1C': 'orange',
-            '#9B59B6': 'pink',
-            '#F39C12': 'orange',
-            '#7F8C8D': 'gray',
-            '#E74C3C': 'orange',
-            '#2C3E50': 'gray',
-            '#000000': 'black',
-            '#ECF0F1': 'gray',
-            '#34495E': 'gray',
-            '#8B4513': 'brown',
-            '#5D6D7E': 'gray',
-            '#D35400': 'orange',
-            '#F8BBD0': 'pink',
-            '#FFAB00': 'orange',
-            '#FDD835': 'yellow',
-            '#43A047': 'green',
-            '#E91E63': 'pink',
-            '#FF5722': 'orange',
-            '#FDD835': 'yellow'
+            '#FF9F1C': 'orange',    // Gusty - orange
+            '#8B4513': 'brown',     // Snicker - brown
+            '#E74C3C': 'red',       // Rudy - red
+            '#FDD835': 'yellow',    // Scampi - yellow
+            '#4A148C': 'pink',      // Stinky Lee - indigo (use pink for now)
+            '#2196F3': 'blue',      // Jonah - blue
+            '#E91E63': 'pink',      // Tink - pink
+            '#424242': 'gray',      // Lucy - dark gray
+            '#F5F5DC': 'white'      // Giselle - creme (use white)
         };
 
         // Get the sprite color
@@ -97,12 +100,20 @@ export default class Cat extends GameObjects.Container {
         console.log(`Cat ${this.data.name}: Creating sprite with texture ${spriteSheetKey} (color: ${this.data.color})`);
 
         // Main sprite using sprite sheet - specify frame 0 initially
-        this.sprite = this.scene.add.sprite(0, 0, spriteSheetKey, 0);
+        // IMPORTANT: Do NOT add the sprite to the scene directly, only to the container
+        this.sprite = new Phaser.GameObjects.Sprite(this.scene, 0, 0, spriteSheetKey, 0);
         this.sprite.setScale(1.5); // Scale up for better visibility
+        
+        // Debug: Check children before adding sprite
+        console.log(`Cat ${this.data.name}: Container children before add:`, this.list.length);
+        
         this.add(this.sprite);
+        
+        // Debug: Check children after adding sprite
+        console.log(`Cat ${this.data.name}: Container children after add:`, this.list.length);
 
         // Name label
-        this.nameLabel = this.scene.add.text(0, -40, this.data.name, {
+        this.nameLabel = new Phaser.GameObjects.Text(this.scene, 0, -40, this.data.name, {
             fontSize: '14px',
             fontStyle: 'bold',
             color: '#ffffff',
@@ -148,13 +159,13 @@ export default class Cat extends GameObjects.Container {
 
     createStatusIndicators() {
         // Mood indicator
-        this.moodIndicator = this.scene.add.text(-30, 20, '', {
+        this.moodIndicator = new Phaser.GameObjects.Text(this.scene, -30, 20, '', {
             fontSize: '20px'
         }).setOrigin(0.5);
         this.add(this.moodIndicator);
 
         // Need indicator
-        this.needIndicator = this.scene.add.text(30, 20, '', {
+        this.needIndicator = new Phaser.GameObjects.Text(this.scene, 30, 20, '', {
             fontSize: '20px'
         }).setOrigin(0.5);
         this.add(this.needIndicator);
