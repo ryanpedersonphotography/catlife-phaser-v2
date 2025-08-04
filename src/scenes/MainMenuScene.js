@@ -249,7 +249,8 @@ export default class MainMenuScene extends Scene {
                 };
                 const spriteColor = colorMap[cats[index].color] || 'gray';
                 const spriteSheetKey = `cat_${spriteColor}`;
-                const cat = this.add.image(pos.x, pos.y, spriteSheetKey, 0);
+                // Use sprite instead of image for sprite sheets
+                const cat = this.add.sprite(pos.x, pos.y, spriteSheetKey, 0);
                 cat.setScale(0.8);
                 
                 // Simple bob animation instead of walking

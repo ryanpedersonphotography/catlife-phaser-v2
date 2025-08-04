@@ -38,7 +38,8 @@ export default class Cat extends GameObjects.Container {
         // Create sprite
         this.createSprite();
 
-        // Container is automatically added to scene when created, no need to add again
+        // Add container to scene properly
+        this.scene.add.existing(this);
         this.setDepth(DEPTHS.CATS);
 
         // Set the hit area for the container to match the sprite bounds
@@ -70,6 +71,44 @@ export default class Cat extends GameObjects.Container {
         // AI will start in update loop
     }
 
+    createFallbackSprite(color) {
+        console.log(`Cat ${this.data.name}: Creating fallback sprite with color ${color}`);
+        
+        // Create a simple colored rectangle as fallback
+        const graphics = this.scene.add.graphics();
+        graphics.fillStyle(parseInt(this.data.color.replace('#', '0x'), 16), 1);
+        graphics.fillRoundedRect(-16, -20, 32, 40, 8);
+        graphics.generateTexture(`fallback_cat_${this.data.id}`, 32, 40);
+        graphics.destroy();
+        
+        // Create sprite with fallback texture
+        this.sprite = new Phaser.GameObjects.Sprite(this.scene, 0, 0, `fallback_cat_${this.data.id}`);
+        this.sprite.setScale(1.5);
+        
+        this.add(this.sprite);
+        
+        // Store sprite sheet key for animations (even though we don't have animations)
+        this.spriteSheetKey = `fallback_cat_${this.data.id}`;
+        
+        // Create name label and status indicators
+        this.createNameLabelAndStatus();
+    }
+
+    createNameLabelAndStatus() {
+        // Name label
+        this.nameLabel = new Phaser.GameObjects.Text(this.scene, 0, -40, this.data.name, {
+            fontSize: '14px',
+            fontStyle: 'bold',
+            color: '#ffffff',
+            stroke: '#000000',
+            strokeThickness: 2
+        }).setOrigin(0.5);
+        this.add(this.nameLabel);
+
+        // Status indicators
+        this.createStatusIndicators();
+    }
+
     createSprite() {
         console.log(`Cat ${this.data.name}: createSprite() called`);
         
@@ -99,10 +138,29 @@ export default class Cat extends GameObjects.Container {
 
         console.log(`Cat ${this.data.name}: Creating sprite with texture ${spriteSheetKey} (color: ${this.data.color})`);
 
+        // Verify texture exists before creating sprite
+        if (!this.scene.textures.exists(spriteSheetKey)) {
+            console.error(`Cat ${this.data.name}: Texture ${spriteSheetKey} does not exist!`);
+            console.log('Available textures:', Object.keys(this.scene.textures.list));
+            // Use a fallback texture or create a simple colored rectangle
+            this.createFallbackSprite(spriteColor);
+            return;
+        }
+
         // Main sprite using sprite sheet - specify frame 0 initially
         // IMPORTANT: Do NOT add the sprite to the scene directly, only to the container
         this.sprite = new Phaser.GameObjects.Sprite(this.scene, 0, 0, spriteSheetKey, 0);
         this.sprite.setScale(1.5); // Scale up for better visibility
+        
+        // Debug: Check sprite texture
+        console.log(`Cat ${this.data.name}: Sprite texture info:`, {
+            textureKey: this.sprite.texture.key,
+            frameKey: this.sprite.frame.name,
+            frameWidth: this.sprite.frame.width,
+            frameHeight: this.sprite.frame.height,
+            sourceWidth: this.sprite.frame.source.width,
+            sourceHeight: this.sprite.frame.source.height
+        });
         
         // Debug: Check children before adding sprite
         console.log(`Cat ${this.data.name}: Container children before add:`, this.list.length);
@@ -112,18 +170,8 @@ export default class Cat extends GameObjects.Container {
         // Debug: Check children after adding sprite
         console.log(`Cat ${this.data.name}: Container children after add:`, this.list.length);
 
-        // Name label
-        this.nameLabel = new Phaser.GameObjects.Text(this.scene, 0, -40, this.data.name, {
-            fontSize: '14px',
-            fontStyle: 'bold',
-            color: '#ffffff',
-            stroke: '#000000',
-            strokeThickness: 2
-        }).setOrigin(0.5);
-        this.add(this.nameLabel);
-
-        // Status indicators
-        this.createStatusIndicators();
+        // Create name label and status indicators
+        this.createNameLabelAndStatus();
 
         // Set initial frame and start idle animation
         this.sprite.setFrame(0);
@@ -152,8 +200,15 @@ export default class Cat extends GameObjects.Container {
     playAnimation(animKey) {
         const fullAnimKey = `${this.spriteSheetKey}_${animKey}`;
         if (this.sprite && this.scene.anims.exists(fullAnimKey)) {
+            console.log(`Cat ${this.data.name}: Playing animation ${fullAnimKey}`);
             this.sprite.play(fullAnimKey);
             this.currentAnimation = animKey;
+        } else {
+            console.warn(`Cat ${this.data.name}: Animation ${fullAnimKey} does not exist.`);
+            // Fallback to a static frame
+            if (this.sprite && this.sprite.texture.key !== `fallback_cat_${this.data.id}`) {
+                this.sprite.setFrame(this.getStaticFrame());
+            }
         }
     }
 

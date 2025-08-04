@@ -42,7 +42,7 @@ export default class PreloadScene extends Scene {
         });
 
         this.load.on('loaderror', (file) => {
-            console.error('PreloadScene: Failed to load file:', file.key, file.src);
+            console.error('PreloadScene: Failed to load file:', file.key, file.src, file);
             if (this.loadingText) {
                 this.loadingText.textContent = `Error loading: ${file.key}`;
                 this.loadingText.style.color = '#ff6b6b';
@@ -55,13 +55,21 @@ export default class PreloadScene extends Scene {
 
     create() {
         console.log('PreloadScene: Create phase starting');
-        console.log('Loaded textures:', this.textures.list);
+        console.log('Loaded textures:', Object.keys(this.textures.list));
         
         // Check if cat sprites loaded
-        const catColors = ['orange', 'black', 'gray', 'brown', 'pink', 'blue', 'green', 'yellow'];
+        const catColors = ['orange', 'black', 'gray', 'brown', 'pink', 'blue', 'green', 'yellow', 'white', 'calico', 'red'];
         catColors.forEach(color => {
-            const key = `cat_idle_${color}`;
-            console.log(`Texture ${key} exists: ${this.textures.exists(key)}`);
+            const key = `cat_${color}`;  // Fixed: Use the actual loaded key
+            const exists = this.textures.exists(key);
+            console.log(`Texture ${key} exists: ${exists}`);
+            if (exists) {
+                const texture = this.textures.get(key);
+                console.log(`  Texture ${key} frames: ${texture.frameTotal}`);
+                // Check first frame
+                const frame = texture.get(0);
+                console.log(`  Frame 0 dimensions: ${frame.width}x${frame.height}`);
+            }
         });
         
         console.log('PreloadScene: Generate missing assets');
@@ -87,6 +95,7 @@ export default class PreloadScene extends Scene {
         
         // Set the base path for all assets
         this.load.setPath('assets/sprites/');
+        console.log('Base path set to:', this.load.path);
         
         // Map of cat colors to sprite sheet files
         const catSpriteSheets = {
@@ -408,6 +417,9 @@ export default class PreloadScene extends Scene {
             const spriteKey = `cat_${color}`;
             
             if (this.textures.exists(spriteKey)) {
+                const texture = this.textures.get(spriteKey);
+                const frameCount = texture.frameTotal;
+                console.log(`Creating animations for ${spriteKey} with ${frameCount} frames`);
                 // Based on the sprite sheet layout (16 frames per row at 64x60):
                 // Row 1 (frames 0-15): Sitting down
                 // Row 2 (frames 16-31): Looking around  
@@ -418,38 +430,69 @@ export default class PreloadScene extends Scene {
                 // Row 7 (frames 96-111): Side walk
                 // Row 8 (frames 112-127): Sitting 2.0
                 
+                // Ensure frame ranges don't exceed available frames
+                const safeFrameEnd = (endFrame) => Math.min(endFrame, frameCount - 1);
+                
                 // Idle/Sitting animation - use first few frames of sitting
-                this.anims.create({
-                    key: `${spriteKey}_idle`,
-                    frames: this.anims.generateFrameNumbers(spriteKey, {
-                        start: 0,
-                        end: 3
-                    }),
-                    frameRate: 4,
-                    repeat: -1
-                });
+                if (frameCount > 0) {
+                    this.anims.create({
+                        key: `${spriteKey}_idle`,
+                        frames: this.anims.generateFrameNumbers(spriteKey, {
+                            start: 0,
+                            end: safeFrameEnd(3)
+                        }),
+                        frameRate: 4,
+                        repeat: -1
+                    });
+                }
                 
-                // Walking animation - use walking frames
-                this.anims.create({
-                    key: `${spriteKey}_walk`,
-                    frames: this.anims.generateFrameNumbers(spriteKey, {
-                        start: 48,
-                        end: 55
-                    }),
-                    frameRate: 8,
-                    repeat: -1
-                });
+                // Walking animation - use walking frames (if we have enough frames)
+                if (frameCount > 48) {
+                    this.anims.create({
+                        key: `${spriteKey}_walk`,
+                        frames: this.anims.generateFrameNumbers(spriteKey, {
+                            start: 48,
+                            end: safeFrameEnd(55)
+                        }),
+                        frameRate: 8,
+                        repeat: -1
+                    });
+                } else {
+                    // Fallback to idle frames for walking
+                    this.anims.create({
+                        key: `${spriteKey}_walk`,
+                        frames: this.anims.generateFrameNumbers(spriteKey, {
+                            start: 0,
+                            end: safeFrameEnd(3)
+                        }),
+                        frameRate: 6,
+                        repeat: -1
+                    });
+                }
                 
-                // Sleeping/Laying animation - use laying down frames
-                this.anims.create({
-                    key: `${spriteKey}_sleep`,
-                    frames: this.anims.generateFrameNumbers(spriteKey, {
-                        start: 32,
-                        end: 35
-                    }),
-                    frameRate: 2,
-                    repeat: -1
-                });
+                // Sleeping/Laying animation - use laying down frames (if available)
+                if (frameCount > 32) {
+                    this.anims.create({
+                        key: `${spriteKey}_sleep`,
+                        frames: this.anims.generateFrameNumbers(spriteKey, {
+                            start: 32,
+                            end: safeFrameEnd(35)
+                        }),
+                        frameRate: 2,
+                        repeat: -1
+                    });
+                } else {
+                    // Fallback to idle frames for sleeping
+                    this.anims.create({
+                        key: `${spriteKey}_sleep`,
+                        frames: this.anims.generateFrameNumbers(spriteKey, {
+                            start: 0,
+                            end: safeFrameEnd(1)
+                        }),
+                        frameRate: 1,
+                        repeat: -1
+                    });
+                }
                 
                 console.log(`Created animations for ${spriteKey}`);
             }

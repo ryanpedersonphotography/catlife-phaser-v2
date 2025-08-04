@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Sprite Dimension Debugger</title>
+</head>
+<body>
+    <h1>Sprite Sheet Dimension Checker</h1>
+    <div id="results"></div>
+    
+    <script>
+        const spriteFiles = [
+            'orange_0.png', 'black_0.png', 'gray_0.png', 'brown_0.png',
+            'pink_0.png', 'blue_0.png', 'teal_0.png', 'yellow_0.png',
+            'white_0.png', 'calico_0.png', 'red_0.png'
+        ];
+        
+        const results = document.getElementById('results');
+        
+        spriteFiles.forEach(filename => {
+            const img = new Image();
+            img.onload = function() {
+                const div = document.createElement('div');
+                div.innerHTML = `
+                    <h3>${filename}</h3>
+                    <p>Dimensions: ${this.width} x ${this.height}</p>
+                    <p>Suggested frameWidth: ${Math.floor(this.width / 16)} (assuming 16 columns)</p>
+                    <p>Suggested frameHeight: ${Math.floor(this.height / 8)} (assuming 8 rows)</p>
+                    <img src="${this.src}" style="max-width: 200px; border: 1px solid #ccc;">
+                `;
+                results.appendChild(div);
+            };
+            img.onerror = function() {
+                const div = document.createElement('div');
+                div.innerHTML = `<h3>${filename}</h3><p style="color: red;">ERROR: File not found</p>`;
+                results.appendChild(div);
+            };
+            img.src = `assets/sprites/${filename}`;
+        });
+    </script>
+</body>
+</html>

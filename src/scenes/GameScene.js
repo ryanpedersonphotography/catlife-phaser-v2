@@ -41,6 +41,9 @@ export default class GameScene extends Scene {
         this.createObjects();
         this.createCats();
         
+        // Debug: Test sprite rendering
+        this.debugTestSprite();
+        
         // Set up UI (runs in parallel scene)
         this.scene.launch('UIScene');
         
@@ -487,5 +490,39 @@ export default class GameScene extends Scene {
             duration: 3000,
             onComplete: () => notification.destroy()
         });
+    }
+    
+    debugTestSprite() {
+        console.log('GameScene: Testing sprite rendering...');
+        
+        // Test if texture exists
+        if (this.textures.exists('cat_orange')) {
+            console.log('cat_orange texture exists, creating test sprite...');
+            
+            // Create a test sprite directly
+            const testSprite = this.add.sprite(400, 300, 'cat_orange', 0);
+            testSprite.setScale(2);
+            testSprite.setDepth(1000); // Very high depth to ensure visibility
+            
+            console.log('Test sprite created:', {
+                x: testSprite.x,
+                y: testSprite.y,
+                visible: testSprite.visible,
+                alpha: testSprite.alpha,
+                scale: testSprite.scaleX,
+                frame: testSprite.frame.name
+            });
+            
+            // Also test room background
+            if (this.textures.exists('room_kitchen')) {
+                console.log('room_kitchen texture exists');
+                const testRoom = this.add.image(200, 200, 'room_kitchen');
+                testRoom.setScale(0.5);
+                testRoom.setDepth(999);
+            }
+        } else {
+            console.error('cat_orange texture does not exist!');
+            console.log('Available textures:', Object.keys(this.textures.list));
+        }
     }
 }

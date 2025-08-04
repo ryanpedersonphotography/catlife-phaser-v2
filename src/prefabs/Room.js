@@ -14,7 +14,8 @@ export default class Room extends GameObjects.Container {
         // Create room visuals
         this.createRoom();
         
-        // Container is automatically added to scene when created, no need to add again
+        // Add container to scene properly
+        this.scene.add.existing(this);
         this.setDepth(DEPTHS.ROOMS);
     }
     
