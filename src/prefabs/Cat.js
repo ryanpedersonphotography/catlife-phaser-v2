@@ -41,6 +41,12 @@ export default class Cat extends GameObjects.Container {
         this.isRunning = false;
         this.animationVariety = 0;
 
+        // Pathfinding
+        this.waypoints = [];
+        this.currentWaypointIndex = 0;
+        this.moveSpeed = 80; // pixels per second - faster for better gameplay
+        this.finalTarget = null;
+
         // Create sprite
         this.createSprite();
 
@@ -350,14 +356,17 @@ export default class Cat extends GameObjects.Container {
     }
 
     executeBehavior(delta) {
-        if (this.target && !this.isDragging) {
-            // Move towards target
-            const distance = Phaser.Math.Distance.Between(this.x, this.y, this.target.x, this.target.y);
+        if (this.isDragging) return;
 
-            if (distance > 50) {
-                // Move towards target
-                const angle = Phaser.Math.Angle.Between(this.x, this.y, this.target.x, this.target.y);
-                const speed = 50 * (delta / 1000);
+        // Check if we have waypoints to follow
+        if (this.waypoints.length > 0 && this.currentWaypointIndex < this.waypoints.length) {
+            const currentWaypoint = this.waypoints[this.currentWaypointIndex];
+            const distance = Phaser.Math.Distance.Between(this.x, this.y, currentWaypoint.x, currentWaypoint.y);
+
+            if (distance > 10) {
+                // Move towards current waypoint
+                const angle = Phaser.Math.Angle.Between(this.x, this.y, currentWaypoint.x, currentWaypoint.y);
+                const speed = this.moveSpeed * (delta / 1000);
 
                 this.x += Math.cos(angle) * speed;
                 this.y += Math.sin(angle) * speed;
@@ -366,10 +375,56 @@ export default class Cat extends GameObjects.Container {
                 this.sprite.setFlipX(Math.cos(angle) < 0);
 
                 this.setState(CAT_STATES.WALKING);
+
+                // Update current room when passing through doors
+                if (currentWaypoint.type === 'door' && distance < 20) {
+                    const newRoom = this.scene.rooms[currentWaypoint.toRoom];
+                    if (newRoom) {
+                        this.currentRoom = newRoom;
+                    }
+                }
             } else {
-                // Reached target
-                this.handleTargetReached();
+                // Reached current waypoint
+                this.currentWaypointIndex++;
+
+                // Check if we've reached all waypoints
+                if (this.currentWaypointIndex >= this.waypoints.length) {
+                    this.waypoints = [];
+                    this.currentWaypointIndex = 0;
+                    
+                    // If we had a final target, handle it
+                    if (this.finalTarget) {
+                        this.handleTargetReached();
+                        this.finalTarget = null;
+                    } else {
+                        this.setState(CAT_STATES.IDLE);
+                    }
+                }
             }
+        } else if (this.target && !this.waypoints.length) {
+            // Set up waypoints to reach target
+            this.setupPathToTarget();
+        }
+    }
+
+    setupPathToTarget() {
+        if (!this.target || !this.scene.pathfinding) {
+            console.log(`Cat ${this.data.name}: No target or pathfinding system`);
+            return;
+        }
+
+        // Store the final target
+        this.finalTarget = this.target;
+
+        // Get waypoints to target
+        if (this.target.x !== undefined && this.target.y !== undefined) {
+            this.waypoints = this.scene.pathfinding.getWaypointsToPosition(this, this.target.x, this.target.y);
+            this.currentWaypointIndex = 0;
+            
+            console.log(`Cat ${this.data.name}: Path to target set with ${this.waypoints.length} waypoints`);
+            this.waypoints.forEach((wp, i) => {
+                console.log(`  Waypoint ${i}: ${wp.type} at (${Math.round(wp.x)}, ${Math.round(wp.y)})`);
+            });
         }
     }
 
@@ -378,6 +433,7 @@ export default class Cat extends GameObjects.Container {
         if (bowl && !bowl.isEmpty()) {
             this.target = bowl;
             this.targetType = 'food';
+            this.setupPathToTarget();
         }
     }
 
@@ -386,6 +442,7 @@ export default class Cat extends GameObjects.Container {
         if (bowl && !bowl.isEmpty()) {
             this.target = bowl;
             this.targetType = 'water';
+            this.setupPathToTarget();
         }
     }
 
@@ -394,6 +451,7 @@ export default class Cat extends GameObjects.Container {
         if (litterBox && !litterBox.isFull()) {
             this.target = litterBox;
             this.targetType = 'litter';
+            this.setupPathToTarget();
         }
     }
 
@@ -406,6 +464,7 @@ export default class Cat extends GameObjects.Container {
                 y: room.y + room.height / 2
             };
             this.targetType = 'sleep';
+            this.setupPathToTarget();
         }
     }
 
@@ -414,6 +473,7 @@ export default class Cat extends GameObjects.Container {
         if (toy) {
             this.target = toy;
             this.targetType = 'play';
+            this.setupPathToTarget();
         }
     }
 
@@ -425,6 +485,14 @@ export default class Cat extends GameObjects.Container {
                 y: this.currentRoom.y + Phaser.Math.Between(50, this.currentRoom.height - 50)
             };
             this.targetType = 'wander';
+            // For wandering within same room, no pathfinding needed
+            this.waypoints = [{
+                x: this.target.x,
+                y: this.target.y,
+                type: 'destination',
+                room: this.currentRoom.id
+            }];
+            this.currentWaypointIndex = 0;
         }
     }
 
@@ -449,6 +517,8 @@ export default class Cat extends GameObjects.Container {
 
         this.target = null;
         this.targetType = null;
+        this.waypoints = [];
+        this.currentWaypointIndex = 0;
     }
 
     eat() {
@@ -664,6 +734,12 @@ export default class Cat extends GameObjects.Container {
     endDrag() {
         this.isDragging = false;
         this.setAlpha(1);
+
+        // Clear any existing waypoints when manually moved
+        this.waypoints = [];
+        this.currentWaypointIndex = 0;
+        this.target = null;
+        this.finalTarget = null;
 
         // Check which room we're in
         const room = this.scene.getRoomAt(this.x, this.y);

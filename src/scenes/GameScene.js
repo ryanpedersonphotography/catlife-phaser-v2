@@ -9,6 +9,7 @@ import FoodBowl from '../prefabs/FoodBowl';
 import GameState from '../systems/GameState';
 import TimeManager from '../systems/TimeManager';
 import NeedManager from '../systems/NeedManager';
+import Pathfinding from '../systems/Pathfinding';
 
 export default class GameScene extends Scene {
     constructor() {
@@ -38,6 +39,10 @@ export default class GameScene extends Scene {
         // Create game world
         this.createBackground();
         this.createRooms();
+        
+        // Initialize pathfinding after rooms are created
+        this.pathfinding = new Pathfinding(this);
+        
         this.createObjects();
         this.createCats();
         
@@ -76,6 +81,25 @@ export default class GameScene extends Scene {
         Object.entries(ROOM_LAYOUT).forEach(([roomId, roomData]) => {
             const room = new Room(this, roomData);
             this.rooms[roomId] = room;
+        });
+        
+        // Create visual door indicators
+        this.createDoorVisuals();
+    }
+    
+    createDoorVisuals() {
+        const doorPositions = [
+            { x: 350, y: 125, width: 10, height: 40 }, // Kitchen to hallway
+            { x: 700, y: 125, width: 10, height: 40 }, // Dining room to hallway
+            { x: 1050, y: 125, width: 10, height: 40 }, // Living room to hallway
+            { x: 175, y: 250, width: 40, height: 10 }, // Bathroom to hallway
+            { x: 600, y: 250, width: 40, height: 10 }, // Bedroom to hallway
+            { x: 1050, y: 200, width: 40, height: 10 } // Living room to outside
+        ];
+        
+        doorPositions.forEach(door => {
+            const doorGraphic = this.add.rectangle(door.x, door.y, door.width, door.height, 0x8B4513, 0.5);
+            doorGraphic.setDepth(DEPTHS.ROOMS + 1);
         });
     }
 
@@ -412,8 +436,10 @@ export default class GameScene extends Scene {
         let nearest = null;
         let minDistance = Infinity;
         
+        // Find nearest object, considering pathfinding distance
         objects.forEach(obj => {
-            const distance = Phaser.Math.Distance.Between(x, y, obj.x, obj.y);
+            // Calculate Manhattan distance as a heuristic
+            const distance = Math.abs(x - obj.x) + Math.abs(y - obj.y);
             if (distance < minDistance) {
                 minDistance = distance;
                 nearest = obj;
