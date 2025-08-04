@@ -133,8 +133,20 @@ export default class GameScene extends Scene {
     }
 
     setupInput() {
-        // Click on objects
+        // Enhanced touch support
+        this.input.addPointer(2); // Support up to 3 touch points
+        
+        // Click/tap on objects with visual feedback
         this.input.on('gameobjectdown', (pointer, gameObject) => {
+            // Visual feedback for touch
+            this.tweens.add({
+                targets: gameObject,
+                scaleX: 0.95,
+                scaleY: 0.95,
+                duration: 100,
+                yoyo: true
+            });
+            
             if (gameObject instanceof FoodBowl) {
                 this.handleFoodBowlClick(gameObject);
             } else if (gameObject instanceof LitterBox) {
@@ -144,10 +156,12 @@ export default class GameScene extends Scene {
             }
         });
         
-        // Drag cats
+        // Drag cats with touch support
         this.input.on('dragstart', (pointer, gameObject) => {
             if (gameObject instanceof Cat) {
                 gameObject.startDrag();
+                // Bring to front
+                gameObject.setDepth(DEPTHS.CATS + 10);
             }
         });
         
@@ -160,6 +174,58 @@ export default class GameScene extends Scene {
         this.input.on('dragend', (pointer, gameObject) => {
             if (gameObject instanceof Cat) {
                 gameObject.endDrag();
+                // Reset depth
+                gameObject.setDepth(DEPTHS.CATS);
+            }
+        });
+        
+        // Double tap for quick actions
+        let lastTapTime = 0;
+        this.input.on('pointerdown', (pointer) => {
+            const currentTime = this.time.now;
+            if (currentTime - lastTapTime < 300) {
+                // Double tap detected
+                this.handleDoubleTap(pointer);
+            }
+            lastTapTime = currentTime;
+        });
+        
+        // Pinch to zoom (disabled for now but framework in place)
+        if (this.input.addPointer) {
+            let initialDistance = 0;
+            let isPinching = false;
+            
+            this.input.on('pointermove', (pointer) => {
+                if (this.input.pointer1.isDown && this.input.pointer2.isDown) {
+                    const distance = Phaser.Math.Distance.Between(
+                        this.input.pointer1.x, this.input.pointer1.y,
+                        this.input.pointer2.x, this.input.pointer2.y
+                    );
+                    
+                    if (!isPinching) {
+                        initialDistance = distance;
+                        isPinching = true;
+                    }
+                    
+                    // Could implement zoom here if needed
+                }
+            });
+            
+            this.input.on('pointerup', () => {
+                isPinching = false;
+            });
+        }
+    }
+    
+    handleDoubleTap(pointer) {
+        // Quick action on double tap
+        const worldPoint = this.cameras.main.getWorldPoint(pointer.x, pointer.y);
+        
+        // Check if tapping on a room
+        Object.values(this.rooms).forEach(room => {
+            if (room.contains(worldPoint.x, worldPoint.y)) {
+                // Center camera on room
+                this.cameras.main.centerOn(room.x, room.y);
             }
         });
     }

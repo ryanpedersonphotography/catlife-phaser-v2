@@ -148,62 +148,61 @@ export default class MainMenuScene extends Scene {
     createMenuButton(x, y, text, callback) {
         const container = this.add.container(x, y);
         
+        // Larger button for touch
+        const btnWidth = 300;
+        const btnHeight = 70;
+        
         // Button background
         const bg = this.add.graphics();
         bg.fillStyle(COLORS.PRIMARY, 0.8);
-        bg.fillRoundedRect(-120, -25, 240, 50, 25);
+        bg.fillRoundedRect(-btnWidth/2, -btnHeight/2, btnWidth, btnHeight, 35);
         container.add(bg);
         
-        // Button text
+        // Button text (larger for readability)
         const buttonText = this.add.text(0, 0, text, {
-            fontSize: '24px',
+            fontSize: '32px',
             fontStyle: 'bold',
             color: '#ffffff'
         }).setOrigin(0.5);
         container.add(buttonText);
         
-        // Make interactive
-        container.setSize(240, 50);
+        // Make interactive with larger hit area
+        container.setSize(btnWidth, btnHeight);
         container.setInteractive({ useHandCursor: true });
         
         container.on('pointerover', () => {
             bg.clear();
             bg.fillStyle(COLORS.PRIMARY, 1);
-            bg.fillRoundedRect(-130, -30, 260, 60, 30);
-            bg.lineStyle(2, COLORS.WHITE, 1);
-            bg.strokeRoundedRect(-130, -30, 260, 60, 30);
-            buttonText.setScale(1.1);
-            
-            this.tweens.add({
-                targets: container,
-                scaleX: 1.05,
-                scaleY: 1.05,
-                duration: 100
-            });
+            bg.fillRoundedRect(-btnWidth/2 - 10, -btnHeight/2 - 5, btnWidth + 20, btnHeight + 10, 40);
+            bg.lineStyle(3, COLORS.WHITE, 1);
+            bg.strokeRoundedRect(-btnWidth/2 - 10, -btnHeight/2 - 5, btnWidth + 20, btnHeight + 10, 40);
+            buttonText.setScale(1.05);
         });
         
         container.on('pointerout', () => {
             bg.clear();
             bg.fillStyle(COLORS.PRIMARY, 0.8);
-            bg.fillRoundedRect(-120, -25, 240, 50, 25);
+            bg.fillRoundedRect(-btnWidth/2, -btnHeight/2, btnWidth, btnHeight, 35);
             buttonText.setScale(1);
-            
-            this.tweens.add({
-                targets: container,
-                scaleX: 1,
-                scaleY: 1,
-                duration: 100
-            });
         });
         
         container.on('pointerdown', () => {
+            bg.clear();
+            bg.fillStyle(COLORS.SECONDARY, 1);
+            bg.fillRoundedRect(-btnWidth/2, -btnHeight/2, btnWidth, btnHeight, 35);
+            
             this.tweens.add({
                 targets: container,
                 scaleX: 0.95,
                 scaleY: 0.95,
-                duration: 50,
+                duration: 100,
                 yoyo: true,
-                onComplete: callback
+                onComplete: () => {
+                    bg.clear();
+                    bg.fillStyle(COLORS.PRIMARY, 0.8);
+                    bg.fillRoundedRect(-btnWidth/2, -btnHeight/2, btnWidth, btnHeight, 35);
+                    callback();
+                }
             });
         });
         

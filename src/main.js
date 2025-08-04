@@ -23,7 +23,15 @@ const config = {
         mode: Phaser.Scale.FIT,
         autoCenter: Phaser.Scale.CENTER_BOTH,
         width: GAME_WIDTH,
-        height: GAME_HEIGHT
+        height: GAME_HEIGHT,
+        min: {
+            width: 320,
+            height: 180
+        },
+        max: {
+            width: 2048,
+            height: 1152
+        }
     },
     physics: {
         default: 'arcade',
@@ -31,6 +39,10 @@ const config = {
             gravity: { y: 0 },
             debug: false
         }
+    },
+    input: {
+        activePointers: 3, // Support multi-touch
+        windowEvents: false
     },
     scene: [
         BootScene,

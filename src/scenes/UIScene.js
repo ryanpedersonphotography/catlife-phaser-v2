@@ -105,22 +105,31 @@ export default class UIScene extends Scene {
 
     createTopButtons() {
         const buttons = [
-            { x: 950, icon: 'II', action: () => this.pauseGame() },
-            { x: 1020, icon: 'S', action: () => this.openSettings() },
-            { x: 1090, icon: 'Save', action: () => this.saveGame() },
-            { x: 1160, icon: 'Door', action: () => this.toggleDoor() }
+            { x: 900, icon: '⏸', action: () => this.pauseGame() },
+            { x: 980, icon: '⚙', action: () => this.openSettings() },
+            { x: 1060, icon: '💾', action: () => this.saveGame() },
+            { x: 1140, icon: '🚪', action: () => this.toggleDoor() }
         ];
         
         buttons.forEach(btn => {
             const button = this.add.text(btn.x, 40, btn.icon, {
-                fontSize: '32px'
+                fontSize: '40px',
+                padding: { x: 15, y: 15 }
             }).setOrigin(0.5)
               .setInteractive({ useHandCursor: true })
               .setDepth(DEPTHS.UI_ELEMENTS);
             
-            button.on('pointerover', () => button.setScale(1.2));
+            // Touch feedback
+            button.on('pointerdown', () => {
+                button.setScale(0.9);
+                this.time.delayedCall(100, () => {
+                    button.setScale(1);
+                });
+            });
+            
+            button.on('pointerover', () => button.setScale(1.1));
             button.on('pointerout', () => button.setScale(1));
-            button.on('pointerdown', btn.action);
+            button.on('pointerup', btn.action);
         });
     }
 
@@ -151,27 +160,32 @@ export default class UIScene extends Scene {
     createActionButton(x, y, action) {
         const container = this.add.container(x, y);
         
+        // Larger button size for touch
+        const btnWidth = 100;
+        const btnHeight = 80;
+        
         // Button background
         const bg = this.add.graphics();
         bg.fillStyle(COLORS.PRIMARY, 0.8);
-        bg.fillRoundedRect(-40, -30, 80, 60, 10);
+        bg.fillRoundedRect(-btnWidth/2, -btnHeight/2, btnWidth, btnHeight, 15);
         container.add(bg);
         
-        // Icon
-        const icon = this.add.image(0, -10, action.icon);
+        // Icon (scaled up for touch)
+        const icon = this.add.image(0, -15, action.icon).setScale(1.5);
         container.add(icon);
         
-        // Text
-        const text = this.add.text(0, 15, action.text, {
-            fontSize: '14px',
-            color: '#ffffff'
+        // Text (larger font for readability)
+        const text = this.add.text(0, 20, action.text, {
+            fontSize: '16px',
+            color: '#ffffff',
+            fontStyle: 'bold'
         }).setOrigin(0.5);
         container.add(text);
         
         // Cost
         if (action.cost > 0) {
-            const cost = this.add.text(30, -25, `-${action.cost}`, {
-                fontSize: '12px',
+            const cost = this.add.text(35, -30, `-${action.cost}`, {
+                fontSize: '14px',
                 color: '#ff6666',
                 fontStyle: 'bold'
             }).setOrigin(0.5);
@@ -179,19 +193,27 @@ export default class UIScene extends Scene {
         }
         
         container.setDepth(DEPTHS.UI_ELEMENTS);
-        container.setSize(80, 60);
+        container.setSize(btnWidth, btnHeight);
         container.setInteractive({ useHandCursor: true });
         
-        container.on('pointerover', () => {
+        // Touch feedback
+        container.on('pointerdown', () => {
             bg.clear();
             bg.fillStyle(COLORS.PRIMARY, 1);
-            bg.fillRoundedRect(-45, -35, 90, 70, 10);
+            bg.fillRoundedRect(-btnWidth/2 - 5, -btnHeight/2 - 5, btnWidth + 10, btnHeight + 10, 15);
+            this.tweens.add({
+                targets: container,
+                scaleX: 0.95,
+                scaleY: 0.95,
+                duration: 100,
+                yoyo: true
+            });
         });
         
-        container.on('pointerout', () => {
+        container.on('pointerup', () => {
             bg.clear();
             bg.fillStyle(COLORS.PRIMARY, 0.8);
-            bg.fillRoundedRect(-40, -30, 80, 60, 10);
+            bg.fillRoundedRect(-btnWidth/2, -btnHeight/2, btnWidth, btnHeight, 15);
         });
     }
 
@@ -199,26 +221,51 @@ export default class UIScene extends Scene {
         const x = GAME_WIDTH - 200;
         const y = GAME_HEIGHT - 50;
         
-        this.speedText = this.add.text(x, y, 'Speed: 1x', {
-            fontSize: '18px',
-            color: '#ffffff'
+        this.speedText = this.add.text(x, y - 10, 'Speed: 1x', {
+            fontSize: '22px',
+            color: '#ffffff',
+            fontStyle: 'bold'
         }).setOrigin(0.5).setDepth(DEPTHS.UI_TEXT);
         
-        // Speed buttons
+        // Speed buttons with larger touch targets
         const speeds = [0.5, 1, 2, 5];
-        const buttons = ['<<', '>', '>>', '>>>'];
+        const buttons = ['0.5x', '1x', '2x', '5x'];
         
         buttons.forEach((btn, index) => {
-            const button = this.add.text(x - 60 + index * 40, y + 25, btn, {
-                fontSize: '24px'
+            const buttonX = x - 90 + index * 60;
+            const buttonY = y + 25;
+            
+            // Button background for better touch
+            const bg = this.add.graphics();
+            bg.fillStyle(0x4a5568, 0.8);
+            bg.fillRoundedRect(buttonX - 25, buttonY - 20, 50, 40, 10);
+            bg.setDepth(DEPTHS.UI_BACKGROUND);
+            
+            const button = this.add.text(buttonX, buttonY, btn, {
+                fontSize: '20px',
+                fontStyle: 'bold'
             }).setOrigin(0.5)
               .setInteractive({ useHandCursor: true })
               .setDepth(DEPTHS.UI_ELEMENTS);
             
             button.on('pointerdown', () => {
+                button.setScale(0.9);
+                bg.clear();
+                bg.fillStyle(0x667eea, 1);
+                bg.fillRoundedRect(buttonX - 25, buttonY - 20, 50, 40, 10);
+                
                 const gameScene = this.scene.get('GameScene');
-                gameScene.timeManager.setSpeed(speeds[index]);
-                this.speedText.setText(`Speed: ${speeds[index]}x`);
+                if (gameScene && gameScene.timeManager) {
+                    gameScene.timeManager.setSpeed(speeds[index]);
+                    this.speedText.setText(`Speed: ${speeds[index]}x`);
+                }
+            });
+            
+            button.on('pointerup', () => {
+                button.setScale(1);
+                bg.clear();
+                bg.fillStyle(0x4a5568, 0.8);
+                bg.fillRoundedRect(buttonX - 25, buttonY - 20, 50, 40, 10);
             });
         });
     }
