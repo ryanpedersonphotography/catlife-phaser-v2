@@ -334,22 +334,16 @@ export default class Cat extends GameObjects.Container {
     }
 
     decideBehavior() {
-        // Priority system for behaviors
+        // Priority system for behaviors - simplified with only food
         if (this.stats.hunger > 70) {
             this.seekFood();
-        } else if (this.stats.thirst > 70) {
-            this.seekWater();
-        } else if (this.stats.bathroom > 80) {
-            this.seekLitterBox();
         } else if (this.stats.energy < 30) {
             this.seekSleep();
-        } else if (Math.random() < 0.3) {
+        } else if (Math.random() < 0.4) {
             this.wander();
-        } else if (Math.random() < 0.2) {
-            this.seekPlay();
-        } else if (Math.random() < 0.1 && this.currentState === CAT_STATES.IDLE) {
+        } else if (Math.random() < 0.2 && this.currentState === CAT_STATES.IDLE) {
             this.groom();
-        } else if (Math.random() < 0.15 && this.currentState === CAT_STATES.IDLE) {
+        } else if (Math.random() < 0.25 && this.currentState === CAT_STATES.IDLE) {
             // Sometimes switch to standing idle
             this.setState(CAT_STATES.IDLE_STAND);
             this.scene.time.delayedCall(Phaser.Math.Between(3000, 6000), () => {
@@ -469,24 +463,6 @@ export default class Cat extends GameObjects.Container {
         }
     }
 
-    seekWater() {
-        const bowl = this.scene.getNearestObject(this.x, this.y, 'water');
-        if (bowl && !bowl.isEmpty()) {
-            this.target = bowl;
-            this.targetType = 'water';
-            this.setupPathToTarget();
-        }
-    }
-
-    seekLitterBox() {
-        const litterBox = this.scene.getNearestObject(this.x, this.y, 'litter');
-        if (litterBox && !litterBox.isFull()) {
-            this.target = litterBox;
-            this.targetType = 'litter';
-            this.setupPathToTarget();
-        }
-    }
-
     seekSleep() {
         // Go to favorite sleep spot
         const room = this.scene.rooms[this.data.preferences.favoriteRoom];
@@ -496,15 +472,6 @@ export default class Cat extends GameObjects.Container {
                 y: room.y + room.height / 2
             };
             this.targetType = 'sleep';
-            this.setupPathToTarget();
-        }
-    }
-
-    seekPlay() {
-        const toy = this.scene.getNearestObject(this.x, this.y, 'toy');
-        if (toy) {
-            this.target = toy;
-            this.targetType = 'play';
             this.setupPathToTarget();
         }
     }
@@ -533,17 +500,8 @@ export default class Cat extends GameObjects.Container {
             case 'food':
                 this.eat();
                 break;
-            case 'water':
-                this.drink();
-                break;
-            case 'litter':
-                this.useLitterBox();
-                break;
             case 'sleep':
                 this.sleep();
-                break;
-            case 'play':
-                this.play();
                 break;
         }
 
@@ -567,31 +525,6 @@ export default class Cat extends GameObjects.Container {
         }
     }
 
-    drink() {
-        if (this.target && !this.target.isEmpty()) {
-            this.setState(CAT_STATES.EATING);
-            this.stats.thirst = Math.max(0, this.stats.thirst - 30);
-            this.target.consume();
-
-            this.scene.time.delayedCall(1500, () => {
-                this.setState(CAT_STATES.IDLE);
-            });
-        }
-    }
-
-    useLitterBox() {
-        if (this.target && !this.target.isFull()) {
-            this.setState(CAT_STATES.USING_LITTER);
-            this.stats.bathroom = 0;
-            this.stats.happiness += 5;
-            this.target.use();
-
-            this.scene.time.delayedCall(3000, () => {
-                this.setState(CAT_STATES.IDLE);
-            });
-        }
-    }
-
     sleep() {
         this.setState(CAT_STATES.SLEEPING);
 
@@ -606,21 +539,6 @@ export default class Cat extends GameObjects.Container {
             },
             repeat: 10
         });
-    }
-
-    play() {
-        if (Math.random() > 0.7) {
-            // Jump play
-            this.playAnimation('jump');
-            this.scene.time.delayedCall(800, () => {
-                this.setState(CAT_STATES.PLAYING);
-            });
-        } else {
-            this.setState(CAT_STATES.PLAYING);
-        }
-        
-        this.stats.happiness += 15;
-        this.stats.energy -= 10;
     }
 
     groom() {

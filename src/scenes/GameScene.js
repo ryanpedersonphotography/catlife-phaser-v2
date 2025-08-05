@@ -5,7 +5,6 @@ import { getAllCats } from '../data/CatDatabase';
 import Cat from '../prefabs/Cat';
 import Room from '../prefabs/Room';
 import Door from '../prefabs/Door';
-import LitterBox from '../prefabs/LitterBox';
 import FoodBowl from '../prefabs/FoodBowl';
 import GameState from '../systems/GameState';
 import TimeManager from '../systems/TimeManager';
@@ -122,33 +121,11 @@ export default class GameScene extends Scene {
         
         // Create objects based on room layout
         Object.entries(ROOM_LAYOUT).forEach(([roomId, roomData]) => {
-            if (roomData.objects.litterBoxes) {
-                roomData.objects.litterBoxes.forEach(pos => {
-                    const litterBox = new LitterBox(this, pos.x, pos.y, roomId);
-                    this.litterBoxes.push(litterBox);
-                });
-            }
-            
+            // Only create food bowls - we removed all other object types
             if (roomData.objects.foodBowls) {
                 roomData.objects.foodBowls.forEach(pos => {
                     const foodBowl = new FoodBowl(this, pos.x, pos.y, 'food');
                     this.foodBowls.push(foodBowl);
-                });
-            }
-            
-            if (roomData.objects.waterBowls) {
-                roomData.objects.waterBowls.forEach(pos => {
-                    const waterBowl = new FoodBowl(this, pos.x, pos.y, 'water');
-                    this.waterBowls.push(waterBowl);
-                });
-            }
-            
-            if (roomData.objects.toys) {
-                roomData.objects.toys.forEach(pos => {
-                    const toy = this.add.image(pos.x, pos.y, 'toy_ball')
-                        .setInteractive()
-                        .setDepth(DEPTHS.OBJECTS);
-                    this.toys.push(toy);
                 });
             }
         });
@@ -189,8 +166,6 @@ export default class GameScene extends Scene {
             
             if (gameObject instanceof FoodBowl) {
                 this.handleFoodBowlClick(gameObject);
-            } else if (gameObject instanceof LitterBox) {
-                this.handleLitterBoxClick(gameObject);
             } else if (gameObject instanceof Cat) {
                 this.handleCatClick(gameObject);
             }
@@ -290,20 +265,6 @@ export default class GameScene extends Scene {
         }
     }
 
-    handleLitterBoxClick(litterBox) {
-        if (litterBox.isDirty()) {
-            const energyCost = 10;
-            if (this.gameState.playerEnergy >= energyCost) {
-                litterBox.clean();
-                this.gameState.useEnergy(energyCost);
-                this.gameState.score += 10;
-                this.gameState.trackAction('clean');
-                this.showNotification('Litter box cleaned! +10 points');
-            } else {
-                this.showNotification('Not enough energy!');
-            }
-        }
-    }
 
     handleCatClick(cat) {
         console.log('GameScene.handleCatClick called with cat:', cat);
@@ -426,29 +387,16 @@ export default class GameScene extends Scene {
     }
 
     getNearestObject(x, y, type) {
-        let objects;
-        switch(type) {
-            case 'food':
-                objects = this.foodBowls;
-                break;
-            case 'water':
-                objects = this.waterBowls;
-                break;
-            case 'litter':
-                objects = this.litterBoxes;
-                break;
-            case 'toy':
-                objects = this.toys;
-                break;
-            default:
-                return null;
+        // Only food type is supported now
+        if (type !== 'food') {
+            return null;
         }
         
         let nearest = null;
         let minDistance = Infinity;
         
-        // Find nearest object, considering pathfinding distance
-        objects.forEach(obj => {
+        // Find nearest food bowl
+        this.foodBowls.forEach(obj => {
             // Calculate Manhattan distance as a heuristic
             const distance = Math.abs(x - obj.x) + Math.abs(y - obj.y);
             if (distance < minDistance) {

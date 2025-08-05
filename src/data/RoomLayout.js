@@ -13,9 +13,6 @@ export const ROOM_LAYOUT = {
             foodBowls: [
                 { x: 100, y: 200 },
                 { x: 150, y: 200 }
-            ],
-            waterBowls: [
-                { x: 200, y: 200 }
             ]
         },
         connections: [ROOM_TYPES.DINING_ROOM, ROOM_TYPES.HALLWAY]
@@ -29,11 +26,7 @@ export const ROOM_LAYOUT = {
         width: 350,
         height: 250,
         color: 0xF0E5CF,
-        objects: {
-            litterBoxes: [
-                { x: 600, y: 280 }
-            ]
-        },
+        objects: {},
         connections: [ROOM_TYPES.KITCHEN, ROOM_TYPES.LIVING_ROOM, ROOM_TYPES.HALLWAY]
     },
     
@@ -45,13 +38,7 @@ export const ROOM_LAYOUT = {
         width: 400,
         height: 250,
         color: 0xE8D5C4,
-        objects: {
-            toys: [
-                { x: 900, y: 200 },
-                { x: 1000, y: 220 }
-            ],
-            scratchingPost: { x: 1100, y: 250 }
-        },
+        objects: {},
         connections: [ROOM_TYPES.DINING_ROOM, ROOM_TYPES.HALLWAY, ROOM_TYPES.OUTSIDE]
     },
     
@@ -63,11 +50,7 @@ export const ROOM_LAYOUT = {
         width: 1140,
         height: 80,
         color: 0xD2B48C,
-        objects: {
-            litterBoxes: [
-                { x: 300, y: 410 }
-            ]
-        },
+        objects: {},
         connections: [ROOM_TYPES.KITCHEN, ROOM_TYPES.DINING_ROOM, ROOM_TYPES.LIVING_ROOM, 
                       ROOM_TYPES.BATHROOM, ROOM_TYPES.BEDROOM]
     },
@@ -80,15 +63,7 @@ export const ROOM_LAYOUT = {
         width: 350,
         height: 200,
         color: 0xB4E4FF,
-        objects: {
-            litterBoxes: [
-                { x: 150, y: 550 },
-                { x: 250, y: 550 }
-            ],
-            waterBowls: [
-                { x: 100, y: 600 }
-            ]
-        },
+        objects: {},
         connections: [ROOM_TYPES.HALLWAY]
     },
     
@@ -100,16 +75,7 @@ export const ROOM_LAYOUT = {
         width: 770,
         height: 200,
         color: 0xD4C5F9,
-        objects: {
-            beds: [
-                { x: 550, y: 600 },
-                { x: 700, y: 600 },
-                { x: 850, y: 600 }
-            ],
-            litterBoxes: [
-                { x: 1000, y: 600 }
-            ]
-        },
+        objects: {},
         connections: [ROOM_TYPES.HALLWAY]
     },
     
