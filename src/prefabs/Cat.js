@@ -425,6 +425,32 @@ export default class Cat extends GameObjects.Container {
         // Get waypoints to target
         if (this.target.x !== undefined && this.target.y !== undefined) {
             this.waypoints = this.scene.pathfinding.getWaypointsToPosition(this, this.target.x, this.target.y);
+            
+            // Check if path is blocked by closed doors
+            if (this.waypoints.length > 0) {
+                // Extract room path from waypoints
+                const roomPath = [this.currentRoom?.id];
+                this.waypoints.forEach(wp => {
+                    if (wp.toRoom && !roomPath.includes(wp.toRoom)) {
+                        roomPath.push(wp.toRoom);
+                    }
+                });
+                
+                // Check if path is clear
+                if (!this.scene.pathfinding.isPathClear(roomPath)) {
+                    console.log(`Cat ${this.data.name}: Path blocked by closed door!`);
+                    this.waypoints = [];
+                    this.target = null;
+                    this.finalTarget = null;
+                    
+                    // Show message only occasionally
+                    if (Math.random() < 0.2) {
+                        this.scene.showNotification(`${this.data.name} can't reach that - door is closed!`, 0xf56565);
+                    }
+                    return;
+                }
+            }
+            
             this.currentWaypointIndex = 0;
             
             console.log(`Cat ${this.data.name}: Path to target set with ${this.waypoints.length} waypoints`);
@@ -753,13 +779,26 @@ export default class Cat extends GameObjects.Container {
         // Check which room we're in
         const room = this.scene.getRoomAt(this.x, this.y);
         if (room) {
-            // Check if this cat can be in this room
+            // First check if the cat can reach this room (doors might be closed)
+            if (this.currentRoom && room.id !== this.currentRoom.id) {
+                // Check if there's a valid path through open doors
+                if (!this.scene.pathfinding.canReachRoom(this.currentRoom.id, room.id)) {
+                    // Return cat to previous room center
+                    this.x = this.currentRoom.x + this.currentRoom.width / 2;
+                    this.y = this.currentRoom.y + this.currentRoom.height / 2;
+                    this.scene.showNotification("Can't go there - door is closed!", 0xf56565);
+                    return;
+                }
+            }
+            
+            // Check if this cat can be in this room (special requirements)
             if (this.canBeInRoom(room)) {
                 this.setRoom(room);
             } else {
                 // Return to previous room
                 if (this.currentRoom) {
-                    this.setRoom(this.currentRoom);
+                    this.x = this.currentRoom.x + this.currentRoom.width / 2;
+                    this.y = this.currentRoom.y + this.currentRoom.height / 2;
                 }
                 this.scene.showNotification("This cat can't go there!");
             }

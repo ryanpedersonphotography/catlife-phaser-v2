@@ -199,15 +199,39 @@ export default class Pathfinding {
     }
 
     canReachRoom(fromRoomId, toRoomId) {
-        // Special check for outside room - requires open door
-        if (toRoomId === 'outside' || fromRoomId === 'outside') {
-            const isDoorOpen = this.scene.registry.get('isDoorOpen');
-            if (!isDoorOpen) {
-                return false;
-            }
+        // Check if there's a door blocking the path
+        const door = this.getDoorBetweenRooms(fromRoomId, toRoomId);
+        if (door && !door.isOpen) {
+            return false;
         }
 
         const path = this.findPath(fromRoomId, toRoomId);
         return path !== null;
+    }
+    
+    getDoorBetweenRooms(roomA, roomB) {
+        if (!this.scene.doors) return null;
+        
+        return this.scene.doors.find(door => 
+            (door.fromRoom === roomA && door.toRoom === roomB) ||
+            (door.fromRoom === roomB && door.toRoom === roomA)
+        );
+    }
+    
+    isPathClear(path) {
+        if (!path || path.length < 2) return true;
+        
+        // Check each room transition for closed doors
+        for (let i = 0; i < path.length - 1; i++) {
+            const fromRoom = path[i];
+            const toRoom = path[i + 1];
+            const door = this.getDoorBetweenRooms(fromRoom, toRoom);
+            
+            if (door && !door.isOpen) {
+                return false;
+            }
+        }
+        
+        return true;
     }
 }

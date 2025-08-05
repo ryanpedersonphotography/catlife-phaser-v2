@@ -11,7 +11,7 @@ export default class UIScene extends Scene {
         
         // Create UI elements
         this.createTopBar();
-        this.createBottomBar();
+        // this.createBottomBar(); // Removed bottom bar
         this.createCatInfoPanel();
         
         // Listen to events from game scene

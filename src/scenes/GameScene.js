@@ -4,6 +4,7 @@ import { ROOM_LAYOUT } from '../data/RoomLayout';
 import { getAllCats } from '../data/CatDatabase';
 import Cat from '../prefabs/Cat';
 import Room from '../prefabs/Room';
+import Door from '../prefabs/Door';
 import LitterBox from '../prefabs/LitterBox';
 import FoodBowl from '../prefabs/FoodBowl';
 import GameState from '../systems/GameState';
@@ -88,18 +89,28 @@ export default class GameScene extends Scene {
     }
     
     createDoorVisuals() {
-        const doorPositions = [
-            { x: 350, y: 125, width: 10, height: 40 }, // Kitchen to hallway
-            { x: 700, y: 125, width: 10, height: 40 }, // Dining room to hallway
-            { x: 1050, y: 125, width: 10, height: 40 }, // Living room to hallway
-            { x: 175, y: 250, width: 40, height: 10 }, // Bathroom to hallway
-            { x: 600, y: 250, width: 40, height: 10 }, // Bedroom to hallway
-            { x: 1050, y: 200, width: 40, height: 10 } // Living room to outside
+        // Create Door objects with proper connections
+        const doorConfigs = [
+            { x: 400, y: 225, width: 20, height: 50, from: 'kitchen', to: 'hallway', orientation: 'vertical' },
+            { x: 770, y: 225, width: 20, height: 50, from: 'diningRoom', to: 'hallway', orientation: 'vertical' },
+            { x: 990, y: 350, width: 20, height: 50, from: 'livingRoom', to: 'hallway', orientation: 'vertical' },
+            { x: 225, y: 470, width: 50, height: 20, from: 'bathroom', to: 'hallway', orientation: 'horizontal' },
+            { x: 805, y: 470, width: 50, height: 20, from: 'bedroom', to: 'hallway', orientation: 'horizontal' },
+            { x: 1190, y: 250, width: 20, height: 50, from: 'livingRoom', to: 'outside', orientation: 'vertical' },
         ];
         
-        doorPositions.forEach(door => {
-            const doorGraphic = this.add.rectangle(door.x, door.y, door.width, door.height, 0x8B4513, 0.5);
-            doorGraphic.setDepth(DEPTHS.ROOMS + 1);
+        this.doors = [];
+        doorConfigs.forEach(config => {
+            const door = new Door(
+                this, 
+                config.x, 
+                config.y, 
+                config.width, 
+                config.height, 
+                config.from, 
+                config.to,
+                config.orientation
+            );
         });
     }
 
