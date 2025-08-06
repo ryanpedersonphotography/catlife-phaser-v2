@@ -17,6 +17,11 @@ module.exports = {
             {
                 directory: path.join(__dirname, 'assets'),
                 publicPath: '/assets'
+            },
+            {
+                directory: path.join(__dirname),
+                publicPath: '/',
+                watch: false
             }
         ],
         compress: true,

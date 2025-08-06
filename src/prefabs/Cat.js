@@ -156,9 +156,9 @@ export default class Cat extends GameObjects.Container {
             return;
         }
 
-        // Create sprite from sprite sheet and set to a safe initial frame
+        // Create sprite from sprite sheet and set to initial frame
         console.log(`Cat ${this.data.name}: Creating sprite from sprite sheet`);
-        this.sprite = new Phaser.GameObjects.Sprite(this.scene, 0, 0, spriteSheetKey, 2); // Start at frame 2 (skip first 2 frames to avoid blinking)
+        this.sprite = new Phaser.GameObjects.Sprite(this.scene, 0, 0, spriteSheetKey, 0); // Start at frame 0
         this.sprite.setScale(3); // Scale up more since sprites are now 32x30 instead of 64x60
         this.sprite.setOrigin(0.5, 0.7); // Adjust Y origin so feet are at position
         
@@ -188,8 +188,8 @@ export default class Cat extends GameObjects.Container {
 
         // Set initial frame and start idle animation
         if (this.sprite instanceof Phaser.GameObjects.Sprite) {
-            // Start at frame 2 to avoid blinking issues with frames 0-1
-            this.sprite.setFrame(2);
+            // Start at frame 0 now that we're using all frames properly
+            this.sprite.setFrame(0);
             this.playAnimation('idle');
         }
         // Images don't need frame or animation setup
@@ -655,30 +655,32 @@ export default class Cat extends GameObjects.Container {
             case CAT_STATES.IDLE:
                 // Use directional idle frames
                 if (this.facing === 'up') {
-                    return 131; // Row 4, col 3 (overhead idle)
+                    return 130; // Row 4, col 2 (back view idle)
                 }
-                return 3;  // Safe idle frame (row 0, col 3)
+                return 3;  // Row 0, col 3 (front view idle)
             case CAT_STATES.WALKING:
-                // Use directional walk frames
+                // Use directional walk frames - middle of walk cycle
                 switch(this.facing) {
                     case 'up':
-                        return 132; // Row 4, col 4 (overhead walk)
+                        return 131; // Row 4, col 3 (back view walk)
                     case 'left':
-                        return 68;  // Row 2, col 4 (left walk)
+                        return 67;  // Row 2, col 3 (left side walk)
                     case 'right':
-                        return 100; // Row 3, col 4 (right walk)
+                        return 99;  // Row 3, col 3 (right side walk)
                     case 'down':
                     default:
-                        return 36;  // Row 1, col 4 (down walk)
+                        return 35;  // Row 1, col 3 (front view walk)
                 }
             case CAT_STATES.SLEEPING:
-                return 99; // Sleep frame (row 3, col 3)
+                return 163; // Row 5, col 3 (sleep frame)
             case CAT_STATES.EATING:
-                return 101; // Eating frame (row 3, col 5)
+                return 195; // Row 6, col 3 (eating frame)
             case CAT_STATES.PLAYING:
-                return 69; // Playing frame (row 2, col 5)
+                return 259; // Row 8, col 3 (playing frame)
+            case CAT_STATES.GROOMING:
+                return 227; // Row 7, col 3 (grooming frame)
             default:
-                return 3;  // Safe default (row 0, col 3)
+                return 3;  // Row 0, col 3 (safe default)
         }
     }
 

@@ -1,0 +1,189 @@
+[info] [webpack-dev-server] Server started: Hot Module Replacement enabled, Live Reloading enabled, Progress disabled, Overlay enabled.
+[log] [HMR] Waiting for update signal from WDS...
+[log] DOM loaded, creating Phaser game
+[log] Game config: JSHandle@object
+[log] %c %c %c %c %c Phaser v3.90.0 (WebGL | Web Audio) %c https://phaser.io/v390 background: #ff0000 background: #ffff00 background: #00ff00 background: #00ffff color: #ffffff; background: #000000 background: transparent
+[log] Phaser game created: JSHandle@object
+[log] BootScene: create() called
+[log] BootScene: Moving to PreloadScene
+[log] PreloadScene: Initialized JSHandle@object
+[log] LoadRealAssets: Starting to load all assets
+[log] Base path set to: assets/sprites/
+[log] Loading sprite sheet: cat_gusty from gusty.png with frames 32x30
+[log] Loading sprite sheet: cat_snicker from snicker.png with frames 32x30
+[log] Loading sprite sheet: cat_rudy from rudy.png with frames 32x30
+[log] Loading sprite sheet: cat_scampi from scampi.png with frames 32x30
+[log] Loading sprite sheet: cat_stinkylee from stinkylee.png with frames 32x30
+[log] Loading sprite sheet: cat_jonah from jonah.png with frames 32x30
+[log] Loading sprite sheet: cat_tink from tink.png with frames 32x30
+[log] Loading sprite sheet: cat_lucy from lucy.png with frames 32x30
+[log] Loading sprite sheet: cat_giselle from giselle.png with frames 32x30
+[error] Failed to load resource: the server responded with a status of 404 (Not Found)
+[log] PreloadScene: Load complete
+[log] PreloadScene: Hiding loading screen
+[log] PreloadScene: Create phase starting
+[log] Loaded textures: JSHandle@array
+[log] Texture cat_orange exists: false
+[log] Texture cat_black exists: false
+[log] Texture cat_gray exists: false
+[log] Texture cat_brown exists: false
+[log] Texture cat_pink exists: false
+[log] Texture cat_blue exists: false
+[log] Texture cat_green exists: false
+[log] Texture cat_yellow exists: false
+[log] Texture cat_white exists: false
+[log] Texture cat_calico exists: false
+[log] Texture cat_red exists: false
+[log] PreloadScene: Generate missing assets
+[log] PreloadScene: Generating missing assets
+[log] PreloadScene: Finished generating missing assets
+[log] Generating room backgrounds...
+[log] PreloadScene: Generate proper cat sprites
+[log] Setting up cat sprites from loaded sprite sheets...
+[log] PreloadScene: Creating animations
+[log] Creating animations for cat sprite sheets...
+[log] Sprite sheet cat_gusty:
+[log]   Total frames: 513
+[log]   Source dimensions: 1024x480
+[log]   Frame dimensions: 32x30
+[log] Created animations for cat_gusty with 513 total frames
+[log] Sprite sheet cat_snicker:
+[log]   Total frames: 513
+[log]   Source dimensions: 1024x480
+[log]   Frame dimensions: 32x30
+[log] Created animations for cat_snicker with 513 total frames
+[log] Sprite sheet cat_rudy:
+[log]   Total frames: 513
+[log]   Source dimensions: 1024x480
+[log]   Frame dimensions: 32x30
+[log] Created animations for cat_rudy with 513 total frames
+[log] Sprite sheet cat_scampi:
+[log]   Total frames: 513
+[log]   Source dimensions: 1024x480
+[log]   Frame dimensions: 32x30
+[log] Created animations for cat_scampi with 513 total frames
+[log] Sprite sheet cat_stinkylee:
+[log]   Total frames: 513
+[log]   Source dimensions: 1024x480
+[log]   Frame dimensions: 32x30
+[log] Created animations for cat_stinkylee with 513 total frames
+[log] Sprite sheet cat_jonah:
+[log]   Total frames: 513
+[log]   Source dimensions: 1024x480
+[log]   Frame dimensions: 32x30
+[log] Created animations for cat_jonah with 513 total frames
+[log] Sprite sheet cat_tink:
+[log]   Total frames: 513
+[log]   Source dimensions: 1024x480
+[log]   Frame dimensions: 32x30
+[log] Created animations for cat_tink with 513 total frames
+[log] Sprite sheet cat_lucy:
+[log]   Total frames: 513
+[log]   Source dimensions: 1024x480
+[log]   Frame dimensions: 32x30
+[log] Created animations for cat_lucy with 513 total frames
+[log] Sprite sheet cat_giselle:
+[log]   Total frames: 513
+[log]   Source dimensions: 1024x480
+[log]   Frame dimensions: 32x30
+[log] Created animations for cat_giselle with 513 total frames
+[log] PreloadScene: Skipping menu, starting GameScene in easy mode
+[log] Creating cat: Gusty
+[log] Cat Gusty: createSprite() called
+[log] Cat Gusty: Creating sprite with unique texture cat_gusty
+[log] Cat Gusty: Creating sprite from sprite sheet
+[log] Cat Gusty: Sprite texture info: JSHandle@object
+[log] Cat Gusty: Container children before add: 0
+[log] Cat Gusty: Container children after add: 1
+[log] Cat Gusty sprite: JSHandle@object
+[log] Creating cat: Snicker
+[log] Cat Snicker: createSprite() called
+[log] Cat Snicker: Creating sprite with unique texture cat_snicker
+[log] Cat Snicker: Creating sprite from sprite sheet
+[log] Cat Snicker: Sprite texture info: JSHandle@object
+[log] Cat Snicker: Container children before add: 0
+[log] Cat Snicker: Container children after add: 1
+[log] Cat Snicker sprite: JSHandle@object
+[log] Creating cat: Rudy
+[log] Cat Rudy: createSprite() called
+[log] Cat Rudy: Creating sprite with unique texture cat_rudy
+[log] Cat Rudy: Creating sprite from sprite sheet
+[log] Cat Rudy: Sprite texture info: JSHandle@object
+[log] Cat Rudy: Container children before add: 0
+[log] Cat Rudy: Container children after add: 1
+[log] Cat Rudy sprite: JSHandle@object
+[log] Creating cat: Scampi
+[log] Cat Scampi: createSprite() called
+[log] Cat Scampi: Creating sprite with unique texture cat_scampi
+[log] Cat Scampi: Creating sprite from sprite sheet
+[log] Cat Scampi: Sprite texture info: JSHandle@object
+[log] Cat Scampi: Container children before add: 0
+[log] Cat Scampi: Container children after add: 1
+[log] Cat Scampi sprite: JSHandle@object
+[log] Creating cat: Stinky Lee
+[log] Cat Stinky Lee: createSprite() called
+[log] Cat Stinky Lee: Creating sprite with unique texture cat_stinkylee
+[log] Cat Stinky Lee: Creating sprite from sprite sheet
+[log] Cat Stinky Lee: Sprite texture info: JSHandle@object
+[log] Cat Stinky Lee: Container children before add: 0
+[log] Cat Stinky Lee: Container children after add: 1
+[log] Cat Stinky Lee sprite: JSHandle@object
+[log] Creating cat: Jonah
+[log] Cat Jonah: createSprite() called
+[log] Cat Jonah: Creating sprite with unique texture cat_jonah
+[log] Cat Jonah: Creating sprite from sprite sheet
+[log] Cat Jonah: Sprite texture info: JSHandle@object
+[log] Cat Jonah: Container children before add: 0
+[log] Cat Jonah: Container children after add: 1
+[log] Cat Jonah sprite: JSHandle@object
+[log] Creating cat: Tink
+[log] Cat Tink: createSprite() called
+[log] Cat Tink: Creating sprite with unique texture cat_tink
+[log] Cat Tink: Creating sprite from sprite sheet
+[log] Cat Tink: Sprite texture info: JSHandle@object
+[log] Cat Tink: Container children before add: 0
+[log] Cat Tink: Container children after add: 1
+[log] Cat Tink sprite: JSHandle@object
+[log] Creating cat: Lucy
+[log] Cat Lucy: createSprite() called
+[log] Cat Lucy: Creating sprite with unique texture cat_lucy
+[log] Cat Lucy: Creating sprite from sprite sheet
+[log] Cat Lucy: Sprite texture info: JSHandle@object
+[log] Cat Lucy: Container children before add: 0
+[log] Cat Lucy: Container children after add: 1
+[log] Cat Lucy sprite: JSHandle@object
+[log] Creating cat: Giselle
+[log] Cat Giselle: createSprite() called
+[log] Cat Giselle: Creating sprite with unique texture cat_giselle
+[log] Cat Giselle: Creating sprite from sprite sheet
+[log] Cat Giselle: Sprite texture info: JSHandle@object
+[log] Cat Giselle: Container children before add: 0
+[log] Cat Giselle: Container children after add: 1
+[log] Cat Giselle sprite: JSHandle@object
+[log] GameScene: Testing sprite rendering...
+[error] cat_orange texture does not exist!
+[log] Available textures: JSHandle@array
+[log] UIScene: Setting up event listeners
+[log] UIScene: Event listeners set up
+[log] Cat Gusty: Animation change from idle to walk
+[log] Cat Scampi: Animation change from idle to walk
+[log] Cat Tink: Animation change from idle to walk
+[log] Cat Gusty: Path to target set with 1 waypoints
+[log]   Waypoint 0: destination at (298, 273)
+[log] Cat Scampi: Path to target set with 1 waypoints
+[log]   Waypoint 0: destination at (107, 234)
+[log] Cat Tink: Path to target set with 1 waypoints
+[log]   Waypoint 0: destination at (107, 526)
+[log] Cat Scampi: Animation change from idle_stand to walk
+[log] Cat Scampi: Path to target set with 1 waypoints
+[log]   Waypoint 0: destination at (222, 208)
+[log] Game loaded, starting animation checks...
+[log] Cat Gusty: Animation change from idle_stand to walk
+[log] Cat Tink: Animation change from idle_stand to walk
+[log] Cat Scampi: Animation change from idle_stand to walk
+[log] Cat Scampi: Path to target set with 1 waypoints
+[log]   Waypoint 0: destination at (123, 210)
+[log] Cat Tink: Path to target set with 1 waypoints
+[log]   Waypoint 0: destination at (308, 527)
+[log] Cat Gusty: Path to target set with 1 waypoints
+[log]   Waypoint 0: destination at (174, 171)

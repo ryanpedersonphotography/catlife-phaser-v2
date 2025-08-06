@@ -53,6 +53,7 @@
             cursor: pointer;
             transition: all 0.3s ease;
             text-transform: uppercase;
+            position: relative;
         }
         
         button:hover {
@@ -62,6 +63,11 @@
         
         button:active {
             transform: translateY(0);
+        }
+        
+        button.active {
+            box-shadow: 0 0 20px rgba(255,215,0,0.8);
+            border: 2px solid #ffd700;
         }
         
         /* Button colors for different animations */
@@ -126,6 +132,9 @@
         <div class="info">
             <div id="current-animation">Current Animation: idle</div>
             <div id="frame-info">Frame: 0 | FPS: 0</div>
+            <div style="margin-top: 15px; font-size: 14px; color: #90ee90;">
+                🎮 Keyboard Controls: Arrow Keys or WASD for walking • Space for idle • 1-6 for actions
+            </div>
         </div>
     </div>
 
@@ -133,6 +142,7 @@
         let cat;
         let currentAnimText;
         let frameText;
+        let currentAnimation = 'idle';
         
         class DemoScene extends Phaser.Scene {
             constructor() {
@@ -156,7 +166,7 @@
                 this.createAnimations();
                 
                 // Create the cat sprite in the center
-                cat = this.add.sprite(400, 200, 'cat_stinkylee', 2);
+                cat = this.add.sprite(400, 200, 'cat_stinkylee', 0);
                 cat.setScale(6); // Make it bigger for demo
                 cat.setOrigin(0.5, 0.5);
                 
@@ -183,12 +193,21 @@
             createAnimations() {
                 const spriteKey = 'cat_stinkylee';
                 
+                // Debug: Check what frames exist
+                if (this.textures.exists(spriteKey)) {
+                    const texture = this.textures.get(spriteKey);
+                    console.log(`Sprite sheet ${spriteKey} info:`);
+                    console.log(`  Total frames: ${texture.frameTotal}`);
+                    console.log(`  Frame dimensions: 32x30`);
+                    console.log(`  Source dimensions: ${texture.source[0].width}x${texture.source[0].height}`);
+                }
+                
                 // === IDLE ANIMATIONS ===
                 this.anims.create({
                     key: `${spriteKey}_idle`,
                     frames: this.anims.generateFrameNumbers(spriteKey, {
-                        start: 2,
-                        end: 5
+                        start: 0,   // Row 0 - front view idle
+                        end: 7
                     }),
                     frameRate: 3,
                     repeat: -1
@@ -197,8 +216,8 @@
                 this.anims.create({
                     key: `${spriteKey}_idle_stand`,
                     frames: this.anims.generateFrameNumbers(spriteKey, {
-                        start: 34,  // Row 1, cols 2-5
-                        end: 37
+                        start: 4,   // Row 0, cols 4-7
+                        end: 7
                     }),
                     frameRate: 3,
                     repeat: -1
@@ -208,7 +227,7 @@
                 this.anims.create({
                     key: `${spriteKey}_walk_up`,
                     frames: this.anims.generateFrameNumbers(spriteKey, {
-                        start: 130, // Row 4 - overhead view
+                        start: 128, // Row 4 - back view (cat walking away)
                         end: 135
                     }),
                     frameRate: 8,
@@ -218,7 +237,7 @@
                 this.anims.create({
                     key: `${spriteKey}_walk_down`,
                     frames: this.anims.generateFrameNumbers(spriteKey, {
-                        start: 34,  // Row 1
+                        start: 32,  // Row 1 - front view (cat walking toward viewer)
                         end: 39
                     }),
                     frameRate: 8,
@@ -228,7 +247,7 @@
                 this.anims.create({
                     key: `${spriteKey}_walk_left`,
                     frames: this.anims.generateFrameNumbers(spriteKey, {
-                        start: 66,  // Row 2
+                        start: 64,  // Row 2 - left side profile
                         end: 71
                     }),
                     frameRate: 8,
@@ -238,7 +257,7 @@
                 this.anims.create({
                     key: `${spriteKey}_walk_right`,
                     frames: this.anims.generateFrameNumbers(spriteKey, {
-                        start: 98,  // Row 3
+                        start: 96,  // Row 3 - right side profile
                         end: 103
                     }),
                     frameRate: 8,
@@ -249,8 +268,8 @@
                 this.anims.create({
                     key: `${spriteKey}_sleep`,
                     frames: this.anims.generateFrameNumbers(spriteKey, {
-                        start: 162,  // Row 5
-                        end: 165
+                        start: 160,  // Row 5
+                        end: 167
                     }),
                     frameRate: 2,
                     repeat: -1
@@ -259,8 +278,8 @@
                 this.anims.create({
                     key: `${spriteKey}_eat`,
                     frames: this.anims.generateFrameNumbers(spriteKey, {
-                        start: 194, // Row 6
-                        end: 197
+                        start: 192, // Row 6
+                        end: 199
                     }),
                     frameRate: 4,
                     repeat: -1
@@ -269,8 +288,8 @@
                 this.anims.create({
                     key: `${spriteKey}_groom`,
                     frames: this.anims.generateFrameNumbers(spriteKey, {
-                        start: 226, // Row 7
-                        end: 229
+                        start: 224, // Row 7
+                        end: 231
                     }),
                     frameRate: 3,
                     repeat: -1
@@ -279,8 +298,8 @@
                 this.anims.create({
                     key: `${spriteKey}_play`,
                     frames: this.anims.generateFrameNumbers(spriteKey, {
-                        start: 258,  // Row 8
-                        end: 261
+                        start: 256,  // Row 8
+                        end: 263
                     }),
                     frameRate: 6,
                     repeat: -1
@@ -289,8 +308,8 @@
                 this.anims.create({
                     key: `${spriteKey}_run`,
                     frames: this.anims.generateFrameNumbers(spriteKey, {
-                        start: 66,  // Use walk left frames but faster
-                        end: 71
+                        start: 288,  // Row 9 - running animation
+                        end: 295
                     }),
                     frameRate: 12,
                     repeat: -1
@@ -299,14 +318,14 @@
                 this.anims.create({
                     key: `${spriteKey}_jump`,
                     frames: this.anims.generateFrameNumbers(spriteKey, {
-                        start: 290,  // Row 9
-                        end: 293
+                        start: 320,  // Row 10
+                        end: 327
                     }),
                     frameRate: 8,
                     repeat: 0
                 });
                 
-                console.log('All animations created!');
+                console.log('All animations created with proper frame indexing!');
             }
         }
         
@@ -339,13 +358,74 @@
                 // Play new animation
                 if (game.anims.exists(fullAnimKey)) {
                     cat.play(fullAnimKey);
+                    currentAnimation = animName;
                     currentAnimText.innerHTML = `Current Animation: ${animName}`;
                     console.log(`Playing animation: ${fullAnimKey}`);
+                    
+                    // Update button states
+                    updateButtonStates(animName);
                 } else {
                     console.error(`Animation ${fullAnimKey} does not exist!`);
                 }
             }
         }
+        
+        // Update button visual states
+        function updateButtonStates(animName) {
+            document.querySelectorAll('button').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.onclick && btn.onclick.toString().includes(animName)) {
+                    btn.classList.add('active');
+                }
+            });
+        }
+        
+        // Add keyboard controls
+        document.addEventListener('keydown', (e) => {
+            switch(e.key) {
+                case 'ArrowUp':
+                case 'w':
+                case 'W':
+                    playAnimation('walk_up');
+                    break;
+                case 'ArrowDown':
+                case 's':
+                case 'S':
+                    playAnimation('walk_down');
+                    break;
+                case 'ArrowLeft':
+                case 'a':
+                case 'A':
+                    playAnimation('walk_left');
+                    break;
+                case 'ArrowRight':
+                case 'd':
+                case 'D':
+                    playAnimation('walk_right');
+                    break;
+                case ' ':
+                    playAnimation('idle');
+                    break;
+                case '1':
+                    playAnimation('sleep');
+                    break;
+                case '2':
+                    playAnimation('eat');
+                    break;
+                case '3':
+                    playAnimation('play');
+                    break;
+                case '4':
+                    playAnimation('groom');
+                    break;
+                case '5':
+                    playAnimation('run');
+                    break;
+                case '6':
+                    playAnimation('jump');
+                    break;
+            }
+        });
     </script>
 </body>
 </html>
