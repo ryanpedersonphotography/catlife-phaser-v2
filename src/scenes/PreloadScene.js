@@ -428,120 +428,183 @@ export default class PreloadScene extends Scene {
                 console.log(`  Total frames: ${frameTotal}`);
                 console.log(`  Source dimensions: ${texture.source[0].width}x${texture.source[0].height}`);
                 console.log(`  Frame dimensions: 32x30`);
-                console.log(`  Calculated columns: ${Math.floor(texture.source[0].width / 32)}`);
-                console.log(`  Calculated rows: ${Math.floor(texture.source[0].height / 30)}`);
                 
                 // The sprite sheets are 1024x480 pixels
                 // At 32x30 per frame, that's 32 columns x 16 rows = 512 frames total
-                // But we need to check which frames actually have cat sprites
+                // BUT: Cat sprites only exist in first 8 frames (columns 0-7) of each row!
+                // Using frames outside columns 0-7 shows empty sprites (phasing)
                 
-                // Based on standard cat sprite sheet layout, let's use simpler animations
-                // Most sprite sheets have these basic animations in the first few rows:
+                // DIRECTIONAL SPRITE LAYOUT:
+                // Row 0: Idle facing down
+                // Row 1: Walk facing down
+                // Row 2: Walk facing left
+                // Row 3: Walk facing right
+                // Row 4: Walk facing up (overhead view)
                 
-                // Row 0 (frames 0-31): Idle/sitting animations
-                // Use frames 0-3 for a simple idle animation
+                // === IDLE ANIMATIONS ===
+                // Idle facing down (row 0, cols 2-5)
                 this.anims.create({
                     key: `${spriteKey}_idle`,
                     frames: this.anims.generateFrameNumbers(spriteKey, {
-                        start: 0,
-                        end: 3
+                        start: 2,
+                        end: 5
                     }),
-                    frameRate: 4,
+                    frameRate: 3,
                     repeat: -1
                 });
                 
-                // Row 1 (frames 32-63): Standing idle
-                // Use frames 32-35 for standing idle
+                // Idle facing down (same as regular idle for now)
+                this.anims.create({
+                    key: `${spriteKey}_idle_down`,
+                    frames: this.anims.generateFrameNumbers(spriteKey, {
+                        start: 2,
+                        end: 5
+                    }),
+                    frameRate: 3,
+                    repeat: -1
+                });
+                
+                // Idle facing up (row 4, cols 2-5)
+                this.anims.create({
+                    key: `${spriteKey}_idle_up`,
+                    frames: this.anims.generateFrameNumbers(spriteKey, {
+                        start: 130,  // Row 4, column 2 (128 + 2)
+                        end: 133     // Row 4, column 5 (128 + 5)
+                    }),
+                    frameRate: 3,
+                    repeat: -1
+                });
+                
+                // Idle standing (row 1, cols 2-5)
                 this.anims.create({
                     key: `${spriteKey}_idle_stand`,
                     frames: this.anims.generateFrameNumbers(spriteKey, {
-                        start: 32,
-                        end: 35
+                        start: 34,  // Row 1, column 2 (32 + 2)
+                        end: 37     // Row 1, column 5 (32 + 5)
                     }),
-                    frameRate: 4,
+                    frameRate: 3,
                     repeat: -1
                 });
                 
-                // Row 2 (frames 64-95): Walking animation
-                // Use frames 64-67 for walking (4 frame walk cycle)
+                // === WALKING ANIMATIONS (DIRECTIONAL) ===
+                // Walk facing down (row 1, cols 2-7)
                 this.anims.create({
-                    key: `${spriteKey}_walk`,
+                    key: `${spriteKey}_walk_down`,
                     frames: this.anims.generateFrameNumbers(spriteKey, {
-                        start: 64,
-                        end: 67
+                        start: 34,  // Row 1, column 2
+                        end: 39     // Row 1, column 7
                     }),
                     frameRate: 8,
                     repeat: -1
                 });
                 
-                // Row 3 (frames 96-127): Running animation
-                // Use frames 96-99 for running
+                // Walk facing left (row 2, cols 2-7)
                 this.anims.create({
-                    key: `${spriteKey}_run`,
+                    key: `${spriteKey}_walk_left`,
                     frames: this.anims.generateFrameNumbers(spriteKey, {
-                        start: 96,
-                        end: 99
+                        start: 66,  // Row 2, column 2 (64 + 2)
+                        end: 71     // Row 2, column 7 (64 + 7)
                     }),
-                    frameRate: 12,
+                    frameRate: 8,
                     repeat: -1
                 });
                 
-                // Row 4 (frames 128-159): Grooming
-                // Use frames 128-131 for grooming
+                // Walk facing right (row 3, cols 2-7)
                 this.anims.create({
-                    key: `${spriteKey}_groom`,
+                    key: `${spriteKey}_walk_right`,
                     frames: this.anims.generateFrameNumbers(spriteKey, {
-                        start: 128,
-                        end: 131
+                        start: 98,  // Row 3, column 2 (96 + 2)
+                        end: 103    // Row 3, column 7 (96 + 7)
                     }),
-                    frameRate: 4,
-                    repeat: 0
+                    frameRate: 8,
+                    repeat: -1
                 });
                 
-                // Row 5 (frames 160-191): Sleeping
-                // Use frames 160-161 for sleeping (breathing animation)
+                // Walk facing up - OVERHEAD VIEW (row 4, cols 2-7)
+                this.anims.create({
+                    key: `${spriteKey}_walk_up`,
+                    frames: this.anims.generateFrameNumbers(spriteKey, {
+                        start: 130, // Row 4, column 2 (128 + 2)
+                        end: 135    // Row 4, column 7 (128 + 7)
+                    }),
+                    frameRate: 8,
+                    repeat: -1
+                });
+                
+                // Legacy walk animation (defaults to down)
+                this.anims.create({
+                    key: `${spriteKey}_walk`,
+                    frames: this.anims.generateFrameNumbers(spriteKey, {
+                        start: 34,  // Row 1, column 2
+                        end: 39     // Row 1, column 7
+                    }),
+                    frameRate: 8,
+                    repeat: -1
+                });
+                
+                // Row 2, columns 2-7: Running animation
+                this.anims.create({
+                    key: `${spriteKey}_run`,
+                    frames: this.anims.generateFrameNumbers(spriteKey, {
+                        start: 66,  // Row 2, column 2 (64 + 2)
+                        end: 71     // Row 2, column 7 (64 + 7)
+                    }),
+                    frameRate: 10,
+                    repeat: -1
+                });
+                
+                // Row 3, columns 2-5: Sleeping animation
                 this.anims.create({
                     key: `${spriteKey}_sleep`,
                     frames: this.anims.generateFrameNumbers(spriteKey, {
-                        start: 160,
-                        end: 161
+                        start: 98,  // Row 3, column 2 (96 + 2)
+                        end: 101    // Row 3, column 5 (96 + 5)
                     }),
                     frameRate: 2,
                     repeat: -1
                 });
                 
-                // Row 6 (frames 192-223): Jumping
-                // Use frames 192-195 for jumping
+                // Row 4, columns 2-5: Grooming animation
                 this.anims.create({
-                    key: `${spriteKey}_jump`,
+                    key: `${spriteKey}_groom`,
                     frames: this.anims.generateFrameNumbers(spriteKey, {
-                        start: 192,
-                        end: 195
+                        start: 130, // Row 4, column 2 (128 + 2)
+                        end: 133    // Row 4, column 5 (128 + 5)
                     }),
-                    frameRate: 10,
+                    frameRate: 3,
                     repeat: 0
                 });
                 
-                // Row 7 (frames 224-255): Eating
-                // Use frames 224-227 for eating
+                // Row 0, columns 4-7: Jumping animation
+                this.anims.create({
+                    key: `${spriteKey}_jump`,
+                    frames: this.anims.generateFrameNumbers(spriteKey, {
+                        start: 4,
+                        end: 7
+                    }),
+                    frameRate: 6,
+                    repeat: 0
+                });
+                
+                // Row 3, columns 4-7: Eating animation
                 this.anims.create({
                     key: `${spriteKey}_eat`,
                     frames: this.anims.generateFrameNumbers(spriteKey, {
-                        start: 224,
-                        end: 227
+                        start: 100, // Row 3, column 4 (96 + 4)
+                        end: 103    // Row 3, column 7 (96 + 7)
                     }),
-                    frameRate: 6,
+                    frameRate: 3,
                     repeat: -1
                 });
                 
-                // Playing animation (use jumping frames)
+                // Row 2, columns 4-7: Playing animation
                 this.anims.create({
                     key: `${spriteKey}_play`,
                     frames: this.anims.generateFrameNumbers(spriteKey, {
-                        start: 192,
-                        end: 195
+                        start: 68,  // Row 2, column 4 (64 + 4)
+                        end: 71     // Row 2, column 7 (64 + 7)
                     }),
-                    frameRate: 8,
+                    frameRate: 6,
                     repeat: -1
                 });
                 

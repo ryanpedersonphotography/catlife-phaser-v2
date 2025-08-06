@@ -41,6 +41,11 @@ export default class Cat extends GameObjects.Container {
         this.isRunning = false;
         this.animationVariety = 0;
 
+        // Direction tracking for proper sprite orientation
+        this.facing = 'down'; // 'up', 'down', 'left', 'right'
+        this.lastX = 0;
+        this.lastY = 0;
+
         // Pathfinding
         this.waypoints = [];
         this.currentWaypointIndex = 0;
@@ -153,7 +158,7 @@ export default class Cat extends GameObjects.Container {
 
         // Create sprite from sprite sheet and set to a safe initial frame
         console.log(`Cat ${this.data.name}: Creating sprite from sprite sheet`);
-        this.sprite = new Phaser.GameObjects.Sprite(this.scene, 0, 0, spriteSheetKey, 2); // Start at frame 2 instead of 0
+        this.sprite = new Phaser.GameObjects.Sprite(this.scene, 0, 0, spriteSheetKey, 2); // Start at frame 2 (skip first 2 frames to avoid blinking)
         this.sprite.setScale(3); // Scale up more since sprites are now 32x30 instead of 64x60
         this.sprite.setOrigin(0.5, 0.7); // Adjust Y origin so feet are at position
         
@@ -183,7 +188,7 @@ export default class Cat extends GameObjects.Container {
 
         // Set initial frame and start idle animation
         if (this.sprite instanceof Phaser.GameObjects.Sprite) {
-            // Start at frame 2 to avoid potential blinking issues with frame 0
+            // Start at frame 2 to avoid blinking issues with frames 0-1
             this.sprite.setFrame(2);
             this.playAnimation('idle');
         }
@@ -365,13 +370,18 @@ export default class Cat extends GameObjects.Container {
                 const angle = Phaser.Math.Angle.Between(this.x, this.y, currentWaypoint.x, currentWaypoint.y);
                 const speed = this.moveSpeed * (delta / 1000);
 
-                this.x += Math.cos(angle) * speed;
-                this.y += Math.sin(angle) * speed;
+                const dx = Math.cos(angle) * speed;
+                const dy = Math.sin(angle) * speed;
+                
+                this.x += dx;
+                this.y += dy;
 
-                // Face direction - flip sprite horizontally when moving left
+                // Calculate direction based on movement
+                this.updateDirection(dx, dy);
+
+                // Don't flip sprite anymore - we have directional animations
                 if (this.sprite) {
-                    const movingLeft = Math.cos(angle) < 0;
-                    this.sprite.setFlipX(movingLeft);
+                    this.sprite.setFlipX(false);
                 }
 
                 this.setState(CAT_STATES.WALKING);
@@ -557,13 +567,28 @@ export default class Cat extends GameObjects.Container {
         this.updateAnimation();
     }
 
+    updateDirection(dx, dy) {
+        // Calculate direction based on movement delta
+        const absDx = Math.abs(dx);
+        const absDy = Math.abs(dy);
+        
+        // Determine primary direction
+        if (absDx > absDy) {
+            // Horizontal movement is stronger
+            this.facing = dx > 0 ? 'right' : 'left';
+        } else {
+            // Vertical movement is stronger
+            this.facing = dy > 0 ? 'down' : 'up';
+        }
+    }
+
     updateAnimation() {
         // Use proper animations with the new sprite sheets
         const animName = this.getAnimationName();
         if (animName !== this.currentAnimation) {
             // Debug: Log animation changes
             if (this.currentState === CAT_STATES.WALKING) {
-                console.log(`Cat ${this.data.name}: Animation change from ${this.currentAnimation} to ${animName}`);
+                console.log(`Cat ${this.data.name}: Animation change from ${this.currentAnimation} to ${animName}, facing: ${this.facing}`);
             }
             this.playAnimation(animName);
         }
@@ -574,6 +599,11 @@ export default class Cat extends GameObjects.Container {
         
         switch(this.currentState) {
             case CAT_STATES.IDLE:
+                // Use directional idle animations
+                if (this.facing === 'up') {
+                    return 'idle_up';
+                }
+                // For now, use regular idle for other directions
                 // Personality modifiers
                 if (this.data.id === 'tink' && this.currentState === CAT_STATES.IDLE) {
                     // Tink is more active, less sitting
@@ -594,9 +624,8 @@ export default class Cat extends GameObjects.Container {
                 return 'idle_stand';
                 
             case CAT_STATES.WALKING:
-                // Always use walk animation when in walking state
-                // Don't check velocity as cats don't have physics bodies in this game
-                return 'walk';
+                // Use directional walk animations based on facing
+                return `walk_${this.facing}`;
                 
             case CAT_STATES.SLEEPING:
                 return 'sleep';
@@ -624,17 +653,32 @@ export default class Cat extends GameObjects.Container {
     getStaticFrame() {
         switch(this.currentState) {
             case CAT_STATES.IDLE:
-                return 0;
+                // Use directional idle frames
+                if (this.facing === 'up') {
+                    return 131; // Row 4, col 3 (overhead idle)
+                }
+                return 3;  // Safe idle frame (row 0, col 3)
             case CAT_STATES.WALKING:
-                return 2;
+                // Use directional walk frames
+                switch(this.facing) {
+                    case 'up':
+                        return 132; // Row 4, col 4 (overhead walk)
+                    case 'left':
+                        return 68;  // Row 2, col 4 (left walk)
+                    case 'right':
+                        return 100; // Row 3, col 4 (right walk)
+                    case 'down':
+                    default:
+                        return 36;  // Row 1, col 4 (down walk)
+                }
             case CAT_STATES.SLEEPING:
-                return 6;
+                return 99; // Sleep frame (row 3, col 3)
             case CAT_STATES.EATING:
-                return 1;
+                return 101; // Eating frame (row 3, col 5)
             case CAT_STATES.PLAYING:
-                return 3;
+                return 69; // Playing frame (row 2, col 5)
             default:
-                return 0;
+                return 3;  // Safe default (row 0, col 3)
         }
     }
 

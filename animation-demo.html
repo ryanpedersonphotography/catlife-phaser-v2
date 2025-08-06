@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cat Animation Demo - Stinky Lee</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: white;
+        }
+        
+        #game-container {
+            width: 800px;
+            height: 400px;
+            margin: 0 auto;
+            border: 3px solid white;
+            border-radius: 10px;
+            background: #2d3748;
+            position: relative;
+        }
+        
+        .controls {
+            width: 800px;
+            margin: 20px auto;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+        }
+        
+        .controls h2 {
+            margin-top: 0;
+            text-align: center;
+            color: #ffd700;
+        }
+        
+        .button-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+        }
+        
+        button {
+            padding: 12px 20px;
+            font-size: 16px;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        /* Button colors for different animations */
+        .walk-btn { background: linear-gradient(135deg, #667eea, #764ba2); color: white; }
+        .idle-btn { background: linear-gradient(135deg, #f093fb, #f5576c); color: white; }
+        .action-btn { background: linear-gradient(135deg, #4facfe, #00f2fe); color: white; }
+        .special-btn { background: linear-gradient(135deg, #43e97b, #38f9d7); color: white; }
+        
+        .info {
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 8px;
+            text-align: center;
+        }
+        
+        #current-animation {
+            font-size: 20px;
+            color: #ffd700;
+            font-weight: bold;
+        }
+        
+        #frame-info {
+            margin-top: 10px;
+            font-family: monospace;
+            color: #90ee90;
+        }
+        
+        .title {
+            text-align: center;
+            font-size: 32px;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3.70.0/dist/phaser.min.js"></script>
+</head>
+<body>
+    <div class="title">🐱 Cat Animation Demo - Stinky Lee 🐱</div>
+    
+    <div id="game-container"></div>
+    
+    <div class="controls">
+        <h2>Animation Controls</h2>
+        <div class="button-grid">
+            <button class="walk-btn" onclick="playAnimation('walk_up')">Walk Up ↑</button>
+            <button class="walk-btn" onclick="playAnimation('walk_down')">Walk Down ↓</button>
+            <button class="walk-btn" onclick="playAnimation('walk_left')">Walk Left ←</button>
+            <button class="walk-btn" onclick="playAnimation('walk_right')">Walk Right →</button>
+            
+            <button class="idle-btn" onclick="playAnimation('idle')">Rest (Idle)</button>
+            <button class="idle-btn" onclick="playAnimation('idle_stand')">Stand</button>
+            <button class="action-btn" onclick="playAnimation('sleep')">Sleep 💤</button>
+            <button class="action-btn" onclick="playAnimation('eat')">Eat 🍽️</button>
+            
+            <button class="special-btn" onclick="playAnimation('groom')">Groom</button>
+            <button class="special-btn" onclick="playAnimation('play')">Play</button>
+            <button class="special-btn" onclick="playAnimation('run')">Run</button>
+            <button class="special-btn" onclick="playAnimation('jump')">Jump</button>
+        </div>
+        
+        <div class="info">
+            <div id="current-animation">Current Animation: idle</div>
+            <div id="frame-info">Frame: 0 | FPS: 0</div>
+        </div>
+    </div>
+
+    <script>
+        let cat;
+        let currentAnimText;
+        let frameText;
+        
+        class DemoScene extends Phaser.Scene {
+            constructor() {
+                super({ key: 'DemoScene' });
+            }
+            
+            preload() {
+                // Load Stinky Lee's sprite sheet
+                this.load.setPath('assets/sprites/');
+                this.load.spritesheet('cat_stinkylee', 'stinkylee.png', {
+                    frameWidth: 32,
+                    frameHeight: 30
+                });
+            }
+            
+            create() {
+                // Set background color
+                this.cameras.main.setBackgroundColor('#2d3748');
+                
+                // Create all animations for Stinky Lee
+                this.createAnimations();
+                
+                // Create the cat sprite in the center
+                cat = this.add.sprite(400, 200, 'cat_stinkylee', 2);
+                cat.setScale(6); // Make it bigger for demo
+                cat.setOrigin(0.5, 0.5);
+                
+                // Start with idle animation
+                cat.play('cat_stinkylee_idle');
+                
+                // Add grid lines for reference
+                this.add.grid(400, 200, 800, 400, 50, 50, 0x444444, 0.2);
+                
+                // Update frame info
+                this.time.addEvent({
+                    delay: 100,
+                    loop: true,
+                    callback: () => {
+                        if (cat && cat.anims && cat.anims.currentAnim) {
+                            const anim = cat.anims.currentAnim;
+                            const frame = cat.anims.currentFrame;
+                            frameText.innerHTML = `Frame: ${frame ? frame.frame.name : 'N/A'} | FPS: ${anim.frameRate} | Repeat: ${anim.repeat}`;
+                        }
+                    }
+                });
+            }
+            
+            createAnimations() {
+                const spriteKey = 'cat_stinkylee';
+                
+                // === IDLE ANIMATIONS ===
+                this.anims.create({
+                    key: `${spriteKey}_idle`,
+                    frames: this.anims.generateFrameNumbers(spriteKey, {
+                        start: 2,
+                        end: 5
+                    }),
+                    frameRate: 3,
+                    repeat: -1
+                });
+                
+                this.anims.create({
+                    key: `${spriteKey}_idle_stand`,
+                    frames: this.anims.generateFrameNumbers(spriteKey, {
+                        start: 34,  // Row 1, cols 2-5
+                        end: 37
+                    }),
+                    frameRate: 3,
+                    repeat: -1
+                });
+                
+                // === DIRECTIONAL WALKING ===
+                this.anims.create({
+                    key: `${spriteKey}_walk_up`,
+                    frames: this.anims.generateFrameNumbers(spriteKey, {
+                        start: 130, // Row 4 - overhead view
+                        end: 135
+                    }),
+                    frameRate: 8,
+                    repeat: -1
+                });
+                
+                this.anims.create({
+                    key: `${spriteKey}_walk_down`,
+                    frames: this.anims.generateFrameNumbers(spriteKey, {
+                        start: 34,  // Row 1
+                        end: 39
+                    }),
+                    frameRate: 8,
+                    repeat: -1
+                });
+                
+                this.anims.create({
+                    key: `${spriteKey}_walk_left`,
+                    frames: this.anims.generateFrameNumbers(spriteKey, {
+                        start: 66,  // Row 2
+                        end: 71
+                    }),
+                    frameRate: 8,
+                    repeat: -1
+                });
+                
+                this.anims.create({
+                    key: `${spriteKey}_walk_right`,
+                    frames: this.anims.generateFrameNumbers(spriteKey, {
+                        start: 98,  // Row 3
+                        end: 103
+                    }),
+                    frameRate: 8,
+                    repeat: -1
+                });
+                
+                // === ACTION ANIMATIONS ===
+                this.anims.create({
+                    key: `${spriteKey}_sleep`,
+                    frames: this.anims.generateFrameNumbers(spriteKey, {
+                        start: 162,  // Row 5
+                        end: 165
+                    }),
+                    frameRate: 2,
+                    repeat: -1
+                });
+                
+                this.anims.create({
+                    key: `${spriteKey}_eat`,
+                    frames: this.anims.generateFrameNumbers(spriteKey, {
+                        start: 194, // Row 6
+                        end: 197
+                    }),
+                    frameRate: 4,
+                    repeat: -1
+                });
+                
+                this.anims.create({
+                    key: `${spriteKey}_groom`,
+                    frames: this.anims.generateFrameNumbers(spriteKey, {
+                        start: 226, // Row 7
+                        end: 229
+                    }),
+                    frameRate: 3,
+                    repeat: -1
+                });
+                
+                this.anims.create({
+                    key: `${spriteKey}_play`,
+                    frames: this.anims.generateFrameNumbers(spriteKey, {
+                        start: 258,  // Row 8
+                        end: 261
+                    }),
+                    frameRate: 6,
+                    repeat: -1
+                });
+                
+                this.anims.create({
+                    key: `${spriteKey}_run`,
+                    frames: this.anims.generateFrameNumbers(spriteKey, {
+                        start: 66,  // Use walk left frames but faster
+                        end: 71
+                    }),
+                    frameRate: 12,
+                    repeat: -1
+                });
+                
+                this.anims.create({
+                    key: `${spriteKey}_jump`,
+                    frames: this.anims.generateFrameNumbers(spriteKey, {
+                        start: 290,  // Row 9
+                        end: 293
+                    }),
+                    frameRate: 8,
+                    repeat: 0
+                });
+                
+                console.log('All animations created!');
+            }
+        }
+        
+        // Initialize Phaser game
+        const config = {
+            type: Phaser.AUTO,
+            width: 800,
+            height: 400,
+            parent: 'game-container',
+            pixelArt: true,
+            scene: DemoScene
+        };
+        
+        const game = new Phaser.Game(config);
+        
+        // Get text elements
+        window.onload = () => {
+            currentAnimText = document.getElementById('current-animation');
+            frameText = document.getElementById('frame-info');
+        };
+        
+        // Function to play animations
+        function playAnimation(animName) {
+            if (cat && cat.anims) {
+                const fullAnimKey = `cat_stinkylee_${animName}`;
+                
+                // Stop current animation
+                cat.anims.stop();
+                
+                // Play new animation
+                if (game.anims.exists(fullAnimKey)) {
+                    cat.play(fullAnimKey);
+                    currentAnimText.innerHTML = `Current Animation: ${animName}`;
+                    console.log(`Playing animation: ${fullAnimKey}`);
+                } else {
+                    console.error(`Animation ${fullAnimKey} does not exist!`);
+                }
+            }
+        }
+    </script>
+</body>
+</html>

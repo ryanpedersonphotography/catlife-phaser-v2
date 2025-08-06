@@ -135,7 +135,22 @@ export default class GameScene extends Scene {
         this.cats = [];
         const allCats = getAllCats();
         
-        // Create all cats with their unique sprites
+        // TEMPORARY: Only create Stinky Lee for testing
+        const stinkyLee = allCats.find(cat => cat.id === 'stinkylee');
+        if (stinkyLee) {
+            console.log(`Creating cat: ${stinkyLee.name}`);
+            const cat = new Cat(this, stinkyLee);
+            this.cats.push(cat);
+            
+            // Place cat in their favorite room
+            const room = this.rooms[stinkyLee.preferences.favoriteRoom];
+            if (room) {
+                cat.setRoom(room);
+            }
+        }
+        
+        // COMMENTED OUT: All other cats for testing
+        /*
         allCats.forEach(catData => {
             console.log(`Creating cat: ${catData.name}`);
             const cat = new Cat(this, catData);
@@ -147,6 +162,7 @@ export default class GameScene extends Scene {
                 cat.setRoom(room);
             }
         });
+        */
     }
 
     setupInput() {
