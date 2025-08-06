@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Walk Up Animation Test - Stinky Lee</title>
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3.70.0/dist/phaser.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background: #1a1a1a;
+            color: white;
+            font-family: monospace;
+        }
+        #controls {
+            margin: 20px;
+            padding: 20px;
+            background: rgba(0,0,0,0.8);
+            border: 2px solid #ff00ff;
+            border-radius: 10px;
+        }
+        button {
+            margin: 5px;
+            padding: 10px 20px;
+            font-size: 16px;
+            background: #4a148c;
+            color: white;
+            border: 2px solid #ff00ff;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #6a1b9a;
+        }
+        button.active {
+            background: #ff00ff;
+            color: black;
+        }
+        .info {
+            margin: 10px 0;
+            padding: 10px;
+            background: rgba(75,0,130,0.3);
+            border-left: 4px solid #ff00ff;
+        }
+        h1 {
+            color: #ff00ff;
+        }
+        .frame-display {
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            gap: 5px;
+            margin: 20px 0;
+            padding: 10px;
+            background: rgba(0,0,0,0.5);
+            border: 1px solid #666;
+        }
+        .frame-box {
+            width: 64px;
+            height: 60px;
+            border: 1px solid #444;
+            position: relative;
+        }
+        .frame-box.active {
+            border: 2px solid #ff00ff;
+            box-shadow: 0 0 10px #ff00ff;
+        }
+        .frame-number {
+            position: absolute;
+            bottom: 0;
+            right: 2px;
+            font-size: 10px;
+            color: #0ff;
+        }
+    </style>
+</head>
+<body>
+    <h1>🐱 Walk Up Animation Tester - Finding the Perfect Back View</h1>
+    
+    <div id="game-container"></div>
+    
+    <div id="controls">
+        <h2>Test Different Rows for Walk Up Animation:</h2>
+        <div class="info">
+            Based on your screenshot, the circled frames appear to be in <strong>Row 8</strong> (frames 256-263)
+        </div>
+        
+        <div>
+            <button onclick="testRow(4)">Row 4 (128-135) - Current</button>
+            <button onclick="testRow(8)" class="active">Row 8 (256-263) - Your Choice ✓</button>
+            <button onclick="testRow(9)">Row 9 (288-295)</button>
+            <button onclick="testRow(10)">Row 10 (320-327)</button>
+            <button onclick="testRow(11)">Row 11 (352-359)</button>
+        </div>
+        
+        <div class="info">
+            <strong>Current Row:</strong> <span id="current-row">8</span><br>
+            <strong>Frame Range:</strong> <span id="frame-range">256-263</span><br>
+            <strong>Animation:</strong> <span id="anim-status">Playing</span>
+        </div>
+        
+        <h3>Frame Preview (Row 8):</h3>
+        <div id="frame-preview" class="frame-display"></div>
+    </div>
+
+    <script>
+    let currentCat;
+    let currentRow = 8; // Start with row 8 based on screenshot
+    let scene;
+    
+    class WalkUpTestScene extends Phaser.Scene {
+        constructor() {
+            super({ key: 'WalkUpTestScene' });
+        }
+        
+        preload() {
+            this.load.spritesheet('stinkylee', 'assets/sprites/stinkylee.png', {
+                frameWidth: 32,
+                frameHeight: 30
+            });
+        }
+        
+        create() {
+            scene = this;
+            this.cameras.main.setBackgroundColor('#2d2d2d');
+            
+            // Create cat sprite at large scale
+            currentCat = this.add.sprite(400, 250, 'stinkylee');  // Moved down to ensure visibility
+            currentCat.setScale(8); // Large scale to see details
+            currentCat.setOrigin(0.5, 0.5);  // Ensure center origin
+            
+            // Start with row 8 animation
+            this.createAnimation(8);
+            currentCat.play('test_walk_up');
+            
+            // Display individual frames from row 8
+            this.displayFrameRow(8);
+            
+            // Add grid for reference
+            this.add.grid(400, 200, 800, 400, 50, 50, 0x444444, 0.2);
+        }
+        
+        createAnimation(row) {
+            // Remove old animation if it exists
+            if (this.anims.exists('test_walk_up')) {
+                this.anims.remove('test_walk_up');
+            }
+            
+            const startFrame = row * 32; // 32 columns per row
+            const endFrame = startFrame + 7; // 8 frames
+            
+            // Debug frame bounds
+            if (this.textures.exists('stinkylee')) {
+                const frame = this.textures.get('stinkylee').get(startFrame);
+                if (frame) {
+                    console.log(`Row ${row} frame info:`, {
+                        width: frame.width,
+                        height: frame.height,
+                        cutX: frame.cutX,
+                        cutY: frame.cutY
+                    });
+                }
+            }
+            
+            console.log(`Creating animation for Row ${row}: frames ${startFrame}-${endFrame}`);
+            
+            this.anims.create({
+                key: 'test_walk_up',
+                frames: this.anims.generateFrameNumbers('stinkylee', {
+                    start: startFrame,
+                    end: endFrame
+                }),
+                frameRate: 8,
+                repeat: -1
+            });
+            
+            // Update display
+            document.getElementById('current-row').textContent = row;
+            document.getElementById('frame-range').textContent = `${startFrame}-${endFrame}`;
+        }
+        
+        displayFrameRow(row) {
+            const preview = document.getElementById('frame-preview');
+            preview.innerHTML = '';
+            
+            const startFrame = row * 32;
+            
+            for (let i = 0; i < 8; i++) {
+                const frameNum = startFrame + i;
+                const frameBox = document.createElement('div');
+                frameBox.className = 'frame-box';
+                frameBox.id = `frame-${frameNum}`;
+                
+                // Create canvas for this frame
+                const canvas = document.createElement('canvas');
+                canvas.width = 64;
+                canvas.height = 60;
+                const ctx = canvas.getContext('2d');
+                
+                // We'll draw the frame when texture is ready
+                if (this.textures.exists('stinkylee')) {
+                    const texture = this.textures.get('stinkylee');
+                    const frame = texture.get(frameNum);
+                    if (frame) {
+                        // Draw frame to canvas (scaled up 2x)
+                        const img = texture.getSourceImage();
+                        ctx.imageSmoothingEnabled = false;
+                        ctx.drawImage(
+                            img,
+                            frame.cutX, frame.cutY,
+                            frame.cutWidth, frame.cutHeight,
+                            0, 0, 64, 60
+                        );
+                    }
+                }
+                
+                frameBox.appendChild(canvas);
+                
+                // Add frame number
+                const frameLabel = document.createElement('div');
+                frameLabel.className = 'frame-number';
+                frameLabel.textContent = frameNum;
+                frameBox.appendChild(frameLabel);
+                
+                preview.appendChild(frameBox);
+            }
+            
+            // Highlight active frames
+            this.time.addEvent({
+                delay: 125, // 8 fps = 125ms per frame
+                callback: () => {
+                    const currentFrame = currentCat.anims.currentFrame;
+                    if (currentFrame) {
+                        // Remove all active classes
+                        document.querySelectorAll('.frame-box').forEach(box => {
+                            box.classList.remove('active');
+                        });
+                        // Add active class to current frame
+                        const activeBox = document.getElementById(`frame-${currentFrame.textureFrame}`);
+                        if (activeBox) {
+                            activeBox.classList.add('active');
+                        }
+                    }
+                },
+                loop: true
+            });
+        }
+    }
+    
+    // Initialize game
+    const config = {
+        type: Phaser.AUTO,
+        width: 800,
+        height: 400,
+        parent: 'game-container',
+        backgroundColor: '#2d2d2d',
+        pixelArt: true,
+        scene: WalkUpTestScene
+    };
+    
+    const game = new Phaser.Game(config);
+    
+    // Test different rows
+    function testRow(row) {
+        currentRow = row;
+        
+        // Update button states
+        document.querySelectorAll('button').forEach(btn => {
+            btn.classList.remove('active');
+        });
+        event.target.classList.add('active');
+        
+        // Create new animation
+        if (scene) {
+            scene.createAnimation(row);
+            currentCat.play('test_walk_up');
+            scene.displayFrameRow(row);
+        }
+    }
+    </script>
+</body>
+</html>

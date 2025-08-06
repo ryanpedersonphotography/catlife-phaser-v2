@@ -1,5 +1,6 @@
 import { GameObjects } from 'phaser';
 import { CAT_STATES, NEED_TYPES, DEPTHS } from '../data/Constants';
+import { SPRITE_CONFIG } from '../data/SpriteSheetConfig';
 
 export default class Cat extends GameObjects.Container {
     constructor(scene, catData) {
@@ -219,29 +220,30 @@ export default class Cat extends GameObjects.Container {
         
         const fullAnimKey = `${this.spriteSheetKey}_${animKey}`;
         
-        if (this.sprite && this.scene.anims.exists(fullAnimKey)) {
-            // Only change animation if it's different
-            if (!this.sprite.anims.isPlaying || this.sprite.anims.currentAnim?.key !== fullAnimKey) {
-                // Stop current animation before playing new one
-                if (this.sprite.anims.isPlaying) {
-                    this.sprite.anims.stop();
-                }
-                
-                // Play the new animation
-                this.sprite.play(fullAnimKey);
-                this.currentAnimation = animKey;
-                
-                // Special handling for one-time animations
-                if (['jump', 'groom'].includes(animKey)) {
-                    this.sprite.once('animationcomplete', () => {
-                        this.setState(CAT_STATES.IDLE);
-                    });
-                }
-            }
-        } else {
-            // Fallback to a static frame if animation doesn't exist
-            if (this.sprite && this.sprite.texture.key !== `fallback_cat_${this.data.id}`) {
+        // Verify animation exists
+        if (!this.scene.anims.exists(fullAnimKey)) {
+            // Try fallback to idle
+            const idleKey = `${this.spriteSheetKey}_idle`;
+            if (this.scene.anims.exists(idleKey) && animKey !== 'idle') {
+                this.playAnimation('idle');
+            } else if (this.sprite.texture.key !== `fallback_cat_${this.data.id}`) {
+                // Use static frame as last resort
                 this.sprite.setFrame(this.getStaticFrame());
+            }
+            return;
+        }
+        
+        // Only change if different animation
+        if (!this.sprite.anims.isPlaying || this.sprite.anims.currentAnim?.key !== fullAnimKey) {
+            this.sprite.play(fullAnimKey);
+            this.currentAnimation = animKey;
+            
+            // Handle one-time animations
+            const config = SPRITE_CONFIG.animations[animKey.replace('walk_', '')];
+            if (config && config.repeat === 0) {
+                this.sprite.once('animationcomplete', () => {
+                    this.setState(CAT_STATES.IDLE);
+                });
             }
         }
     }
@@ -595,92 +597,82 @@ export default class Cat extends GameObjects.Container {
     }
 
     getAnimationName() {
+        // State to animation mapping
+        const stateAnimMap = {
+            [CAT_STATES.IDLE]: this.getIdleAnimation(),
+            [CAT_STATES.IDLE_STAND]: 'idle_stand',
+            [CAT_STATES.WALKING]: `walk_${this.facing}`,
+            [CAT_STATES.SLEEPING]: 'sleep',
+            [CAT_STATES.EATING]: 'eat',
+            [CAT_STATES.PLAYING]: 'play',
+            [CAT_STATES.USING_LITTER]: 'groom',
+            [CAT_STATES.GROOMING]: 'groom',
+            [CAT_STATES.RUNNING]: 'run'
+        };
+        
+        return stateAnimMap[this.currentState] || 'idle';
+    }
+    
+    getIdleAnimation() {
         const currentTime = this.scene.time.now;
         
-        switch(this.currentState) {
-            case CAT_STATES.IDLE:
-                // Use directional idle animations
-                if (this.facing === 'up') {
-                    return 'idle_up';
-                }
-                // For now, use regular idle for other directions
-                // Personality modifiers
-                if (this.data.id === 'tink' && this.currentState === CAT_STATES.IDLE) {
-                    // Tink is more active, less sitting
-                    return 'idle_stand';
-                } else if (this.data.id === 'stinkylee' && this.currentState === CAT_STATES.IDLE) {
-                    // Stinky Lee is aloof, more sitting
-                    return 'idle';
-                }
-                
-                // Alternate between sitting and standing idle for other cats
-                if (currentTime - this.lastIdleTime > 5000) {
-                    this.animationVariety = (this.animationVariety + 1) % 2;
-                    this.lastIdleTime = currentTime;
-                }
-                return this.animationVariety === 0 ? 'idle' : 'idle_stand';
-                
-            case CAT_STATES.IDLE_STAND:
-                return 'idle_stand';
-                
-            case CAT_STATES.WALKING:
-                // Use directional walk animations based on facing
-                return `walk_${this.facing}`;
-                
-            case CAT_STATES.SLEEPING:
-                return 'sleep';
-                
-            case CAT_STATES.EATING:
-                return 'eat';
-                
-            case CAT_STATES.PLAYING:
-                return 'play';
-                
-            case CAT_STATES.USING_LITTER:
-                return 'groom';
-                
-            case CAT_STATES.GROOMING:
-                return 'groom';
-                
-            case CAT_STATES.RUNNING:
-                return 'run';
-                
-            default:
-                return 'idle';
+        // Use directional idle if facing up
+        if (this.facing === 'up') {
+            return 'idle_up';
         }
+        
+        // Personality-based idle animations
+        if (this.data.id === 'tink') {
+            // Tink is more active, prefers standing
+            return 'idle_stand';
+        } else if (this.data.id === 'stinkylee') {
+            // Stinky Lee is aloof, prefers sitting
+            return 'idle';
+        }
+        
+        // Alternate between sitting and standing for variety
+        if (currentTime - this.lastIdleTime > 5000) {
+            this.animationVariety = (this.animationVariety + 1) % 2;
+            this.lastIdleTime = currentTime;
+        }
+        
+        return this.animationVariety === 0 ? 'idle' : 'idle_stand';
     }
 
     getStaticFrame() {
+        // Calculate static frames using sprite config
+        const col = 3; // Middle frame of animation
+        
         switch(this.currentState) {
             case CAT_STATES.IDLE:
-                // Use directional idle frames
                 if (this.facing === 'up') {
-                    return 130; // Row 4, col 2 (back view idle)
+                    return 4 * SPRITE_CONFIG.columnsPerRow + 2; // Row 4, col 2
                 }
-                return 3;  // Row 0, col 3 (front view idle)
+                return 0 * SPRITE_CONFIG.columnsPerRow + col; // Row 0, col 3
+                
             case CAT_STATES.WALKING:
-                // Use directional walk frames - middle of walk cycle
-                switch(this.facing) {
-                    case 'up':
-                        return 131; // Row 4, col 3 (back view walk)
-                    case 'left':
-                        return 67;  // Row 2, col 3 (left side walk)
-                    case 'right':
-                        return 99;  // Row 3, col 3 (right side walk)
-                    case 'down':
-                    default:
-                        return 35;  // Row 1, col 3 (front view walk)
-                }
+                const walkFrames = {
+                    'up': 4 * SPRITE_CONFIG.columnsPerRow + col,
+                    'left': 2 * SPRITE_CONFIG.columnsPerRow + col,
+                    'right': 3 * SPRITE_CONFIG.columnsPerRow + col,
+                    'down': 1 * SPRITE_CONFIG.columnsPerRow + col
+                };
+                return walkFrames[this.facing] || walkFrames['down'];
+                
             case CAT_STATES.SLEEPING:
-                return 163; // Row 5, col 3 (sleep frame)
+                return 5 * SPRITE_CONFIG.columnsPerRow + col;
+                
             case CAT_STATES.EATING:
-                return 195; // Row 6, col 3 (eating frame)
+                return 6 * SPRITE_CONFIG.columnsPerRow + col;
+                
             case CAT_STATES.PLAYING:
-                return 259; // Row 8, col 3 (playing frame)
+                return 8 * SPRITE_CONFIG.columnsPerRow + col;
+                
             case CAT_STATES.GROOMING:
-                return 227; // Row 7, col 3 (grooming frame)
+                return 7 * SPRITE_CONFIG.columnsPerRow + col;
+                
             default:
-                return 3;  // Row 0, col 3 (safe default)
+                return col; // Safe default
         }
     }
 

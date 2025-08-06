@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Verify Stinky Lee Directional Animations</title>
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3.70.0/dist/phaser.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background: #2d2d2d;
+            color: white;
+            font-family: monospace;
+        }
+        .info {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            padding: 10px;
+            background: rgba(0,0,0,0.8);
+            border: 1px solid #0f0;
+        }
+        h2 { color: #0f0; }
+        .status { color: #ff0; }
+    </style>
+</head>
+<body>
+    <div class="info">
+        <h2>Stinky Lee Animation Verifier</h2>
+        <div class="status">
+            Frame Mapping (32 cols x 16 rows):<br>
+            Row 0 (0-7): Idle<br>
+            Row 1 (32-39): Walk DOWN<br>
+            Row 2 (64-71): Walk LEFT<br>
+            Row 3 (96-103): Walk RIGHT<br>
+            Row 8 (256-263): Walk UP (back with tail)<br>
+        </div>
+        <p>Press arrow keys to test directions!</p>
+        <p id="current-anim">Current: idle</p>
+        <p id="frame-info">Frame: 0</p>
+    </div>
+
+    <script>
+    // Sprite configuration matching refactored system
+    const SPRITE_CONFIG = {
+        frameWidth: 32,
+        frameHeight: 30,
+        columnsPerRow: 32,
+        validColumns: 8
+    };
+    
+    // Animation configurations
+    const animations = {
+        idle: { row: 0, frames: 8, frameRate: 4 },
+        walk_up: { row: 8, frames: 8, frameRate: 8 },  // Row 8 - cat's back with tail visible
+        walk_down: { row: 1, frames: 8, frameRate: 8 },
+        walk_left: { row: 2, frames: 8, frameRate: 8 },
+        walk_right: { row: 3, frames: 8, frameRate: 8 }
+    };
+    
+    function getFrameRange(row, frames) {
+        const start = row * SPRITE_CONFIG.columnsPerRow;
+        const end = start + frames - 1;
+        return { start, end };
+    }
+    
+    class VerifyScene extends Phaser.Scene {
+        preload() {
+            this.load.spritesheet('stinkylee', 'assets/sprites/stinkylee.png', {
+                frameWidth: SPRITE_CONFIG.frameWidth,
+                frameHeight: SPRITE_CONFIG.frameHeight
+            });
+        }
+
+        create() {
+            // Log sprite sheet info
+            const texture = this.textures.get('stinkylee');
+            console.log('Sprite sheet loaded:');
+            console.log('  Total frames:', texture.frameTotal);
+            console.log('  Source size:', texture.source[0].width + 'x' + texture.source[0].height);
+            console.log('  Expected: 1024x480 (32x16 grid)');
+            console.log('Using refactored animation system');
+            
+            // Create animations using centralized configuration
+            Object.entries(animations).forEach(([animName, config]) => {
+                const frames = getFrameRange(config.row, config.frames);
+                
+                console.log(`Creating ${animName}: Row ${config.row}, frames ${frames.start}-${frames.end}`);
+                
+                this.anims.create({
+                    key: animName,
+                    frames: this.anims.generateFrameNumbers('stinkylee', frames),
+                    frameRate: config.frameRate,
+                    repeat: -1
+                });
+            });
+
+            // Create cat sprite
+            this.cat = this.add.sprite(400, 300, 'stinkylee');
+            this.cat.setScale(8); // Make it big to see details
+            this.cat.play('idle');
+
+            // Setup keyboard controls
+            this.cursors = this.input.keyboard.createCursorKeys();
+
+            // Update info display
+            this.time.addEvent({
+                delay: 100,
+                callback: () => {
+                    if (this.cat.anims.currentAnim) {
+                        document.getElementById('current-anim').textContent = 
+                            'Current: ' + this.cat.anims.currentAnim.key;
+                        document.getElementById('frame-info').textContent = 
+                            'Frame: ' + (this.cat.anims.currentFrame ? this.cat.anims.currentFrame.textureFrame : 'N/A');
+                    }
+                },
+                loop: true
+            });
+        }
+
+        update() {
+            if (this.cursors.up.isDown) {
+                this.cat.play('walk_up', true);
+                console.log('Playing walk_up - should show CAT\'S BACK (tail visible)');
+            } else if (this.cursors.down.isDown) {
+                this.cat.play('walk_down', true);
+                console.log('Playing walk_down - should show CAT\'S FACE');
+            } else if (this.cursors.left.isDown) {
+                this.cat.play('walk_left', true);
+                console.log('Playing walk_left - should show LEFT PROFILE');
+            } else if (this.cursors.right.isDown) {
+                this.cat.play('walk_right', true);
+                console.log('Playing walk_right - should show RIGHT PROFILE');
+            } else if (this.cursors.space && this.cursors.space.isDown) {
+                this.cat.play('idle', true);
+            }
+        }
+    }
+
+    const game = new Phaser.Game({
+        type: Phaser.AUTO,
+        width: 800,
+        height: 600,
+        backgroundColor: '#4a4a4a',
+        pixelArt: true,
+        scene: VerifyScene
+    });
+    </script>
+</body>
+</html>

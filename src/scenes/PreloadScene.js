@@ -1,6 +1,8 @@
 import { Scene } from 'phaser';
 import { COLORS } from '../data/Constants';
 import { getAllCats } from '../data/CatDatabase';
+import AnimationFactory from '../systems/AnimationFactory';
+import { SPRITE_CONFIG, validateSpriteSheet } from '../data/SpriteSheetConfig';
 
 export default class PreloadScene extends Scene {
     constructor() {
@@ -116,15 +118,14 @@ export default class PreloadScene extends Scene {
             'giselle': 'giselle.png'
         };
         
-        // Load sprite sheets with proper frame dimensions for animations
-        // Each cat is 32x30 pixels, not 64x60!
+        // Load sprite sheets using centralized config
         Object.entries(catSpriteSheets).forEach(([catName, filename]) => {
             const key = `cat_${catName}`;
-            console.log(`Loading sprite sheet: ${key} from ${filename} with frames 32x30`);
+            console.log(`Loading sprite sheet: ${key} from ${filename}`);
             
             this.load.spritesheet(key, filename, {
-                frameWidth: 32,
-                frameHeight: 30,
+                frameWidth: SPRITE_CONFIG.frameWidth,
+                frameHeight: SPRITE_CONFIG.frameHeight,
                 margin: 0,
                 spacing: 0
             });
@@ -412,205 +413,37 @@ export default class PreloadScene extends Scene {
     }
     
     createAnimations() {
-        console.log('Creating animations for cat sprite sheets...');
+        console.log('Creating animations using AnimationFactory...');
         
+        // Initialize animation factory
+        this.animationFactory = new AnimationFactory(this);
+        
+        // Get list of cats to create animations for
         const catNames = ['gusty', 'snicker', 'rudy', 'scampi', 'stinkylee', 'jonah', 'tink', 'lucy', 'giselle'];
         
+        // Validate sprite sheets before creating animations
         catNames.forEach(catName => {
             const spriteKey = `cat_${catName}`;
-            
             if (this.textures.exists(spriteKey)) {
                 const texture = this.textures.get(spriteKey);
-                const frameTotal = texture.frameTotal;
-                
-                // Debug: Log sprite sheet info
-                console.log(`Sprite sheet ${spriteKey}:`);
-                console.log(`  Total frames: ${frameTotal}`);
-                console.log(`  Source dimensions: ${texture.source[0].width}x${texture.source[0].height}`);
-                console.log(`  Frame dimensions: 32x30`);
-                
-                // The sprite sheets are 1024x480 pixels
-                // At 32x30 per frame, that's 32 columns x 16 rows = 512 frames total
-                // BUT: Cat sprites only exist in first 8 frames (columns 0-7) of each row!
-                // Using frames outside columns 0-7 shows empty sprites (phasing)
-                
-                // CORRECT DIRECTIONAL SPRITE LAYOUT:
-                // Row 0: Idle (front view - cat facing player)
-                // Row 1: Walk DOWN (front view - cat walking toward player)
-                // Row 2: Walk LEFT (left side profile)
-                // Row 3: Walk RIGHT (right side profile)
-                // Row 4: Walk UP (back view - cat walking away, showing its back)
-                
-                // === IDLE ANIMATIONS ===
-                // Idle facing down/front (row 0, all 8 frames)
-                this.anims.create({
-                    key: `${spriteKey}_idle`,
-                    frames: this.anims.generateFrameNumbers(spriteKey, {
-                        start: 0,  // Row 0, column 0
-                        end: 7     // Row 0, column 7
-                    }),
-                    frameRate: 3,
-                    repeat: -1
-                });
-                
-                // Idle facing down (same as regular idle - front view)
-                this.anims.create({
-                    key: `${spriteKey}_idle_down`,
-                    frames: this.anims.generateFrameNumbers(spriteKey, {
-                        start: 0,
-                        end: 7
-                    }),
-                    frameRate: 3,
-                    repeat: -1
-                });
-                
-                // Idle facing up (row 4 for back view)
-                this.anims.create({
-                    key: `${spriteKey}_idle_up`,
-                    frames: this.anims.generateFrameNumbers(spriteKey, {
-                        start: 128,  // Row 4, column 0
-                        end: 131     // Row 4, column 3 (shorter idle loop)
-                    }),
-                    frameRate: 3,
-                    repeat: -1
-                });
-                
-                // Idle standing variation (using row 0 subset)
-                this.anims.create({
-                    key: `${spriteKey}_idle_stand`,
-                    frames: this.anims.generateFrameNumbers(spriteKey, {
-                        start: 4,  // Row 0, column 4
-                        end: 7     // Row 0, column 7
-                    }),
-                    frameRate: 3,
-                    repeat: -1
-                });
-                
-                // === WALKING ANIMATIONS (DIRECTIONAL) ===
-                // Walk DOWN - Cat walking toward player (FRONT VIEW)
-                this.anims.create({
-                    key: `${spriteKey}_walk_down`,
-                    frames: this.anims.generateFrameNumbers(spriteKey, {
-                        start: 32,  // Row 1, column 0
-                        end: 39     // Row 1, column 7
-                    }),
-                    frameRate: 8,
-                    repeat: -1
-                });
-                
-                // Walk LEFT - Cat walking left (LEFT SIDE PROFILE)
-                this.anims.create({
-                    key: `${spriteKey}_walk_left`,
-                    frames: this.anims.generateFrameNumbers(spriteKey, {
-                        start: 64,  // Row 2, column 0
-                        end: 71     // Row 2, column 7
-                    }),
-                    frameRate: 8,
-                    repeat: -1
-                });
-                
-                // Walk RIGHT - Cat walking right (RIGHT SIDE PROFILE)
-                this.anims.create({
-                    key: `${spriteKey}_walk_right`,
-                    frames: this.anims.generateFrameNumbers(spriteKey, {
-                        start: 96,  // Row 3, column 0
-                        end: 103    // Row 3, column 7
-                    }),
-                    frameRate: 8,
-                    repeat: -1
-                });
-                
-                // Walk UP - Cat walking away (BACK VIEW - showing tail and back!)
-                this.anims.create({
-                    key: `${spriteKey}_walk_up`,
-                    frames: this.anims.generateFrameNumbers(spriteKey, {
-                        start: 128, // Row 4, column 0
-                        end: 135    // Row 4, column 7
-                    }),
-                    frameRate: 8,
-                    repeat: -1
-                });
-                
-                // Legacy walk animation (defaults to down/front view)
-                this.anims.create({
-                    key: `${spriteKey}_walk`,
-                    frames: this.anims.generateFrameNumbers(spriteKey, {
-                        start: 32,  // Row 1, column 0
-                        end: 39     // Row 1, column 7
-                    }),
-                    frameRate: 8,
-                    repeat: -1
-                });
-                
-                // === OTHER ANIMATIONS ===
-                // Sleep animation (row 5)
-                this.anims.create({
-                    key: `${spriteKey}_sleep`,
-                    frames: this.anims.generateFrameNumbers(spriteKey, {
-                        start: 160,  // Row 5, column 0
-                        end: 167     // Row 5, column 7
-                    }),
-                    frameRate: 2,
-                    repeat: -1
-                });
-                
-                // Eating animation (row 6)
-                this.anims.create({
-                    key: `${spriteKey}_eat`,
-                    frames: this.anims.generateFrameNumbers(spriteKey, {
-                        start: 192, // Row 6, column 0
-                        end: 199    // Row 6, column 7
-                    }),
-                    frameRate: 4,
-                    repeat: -1
-                });
-                
-                // Grooming animation (row 7)
-                this.anims.create({
-                    key: `${spriteKey}_groom`,
-                    frames: this.anims.generateFrameNumbers(spriteKey, {
-                        start: 224, // Row 7, column 0
-                        end: 231    // Row 7, column 7
-                    }),
-                    frameRate: 3,
-                    repeat: 0
-                });
-                
-                // Playing animation (row 8)
-                this.anims.create({
-                    key: `${spriteKey}_play`,
-                    frames: this.anims.generateFrameNumbers(spriteKey, {
-                        start: 256,  // Row 8, column 0
-                        end: 263     // Row 8, column 7
-                    }),
-                    frameRate: 6,
-                    repeat: -1
-                });
-                
-                // Running animation (row 9 - or reuse walk with faster speed)
-                this.anims.create({
-                    key: `${spriteKey}_run`,
-                    frames: this.anims.generateFrameNumbers(spriteKey, {
-                        start: 288,  // Row 9, column 0
-                        end: 295     // Row 9, column 7
-                    }),
-                    frameRate: 12,
-                    repeat: -1
-                });
-                
-                // Jump animation (row 10)
-                this.anims.create({
-                    key: `${spriteKey}_jump`,
-                    frames: this.anims.generateFrameNumbers(spriteKey, {
-                        start: 320,  // Row 10, column 0
-                        end: 327     // Row 10, column 7
-                    }),
-                    frameRate: 10,
-                    repeat: 0
-                });
-                
-                console.log(`Created animations for ${spriteKey} with ${frameTotal} total frames`);
+                validateSpriteSheet(texture);
             }
         });
+        
+        // Create all animations using factory
+        const results = this.animationFactory.createAllCatAnimations(catNames);
+        
+        // Log any failures
+        Object.entries(results).forEach(([catName, success]) => {
+            if (!success) {
+                console.error(`Failed to create animations for ${catName}`);
+            }
+        });
+        
+        // Verify animations in debug mode
+        if (this.game.config.physics && this.game.config.physics.arcade && this.game.config.physics.arcade.debug) {
+            console.log('Debug mode: Verifying all animations...');
+            this.animationFactory.verifyAllAnimations(catNames);
+        }
     }
 }
